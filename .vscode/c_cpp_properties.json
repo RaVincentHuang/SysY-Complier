@@ -5,7 +5,8 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "/usr/include/llvm-14",
-                "/usr/include/llvm-c-14"
+                "/usr/include/llvm-c-14",
+                "/usr/local/include/antlr4-runtime"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
