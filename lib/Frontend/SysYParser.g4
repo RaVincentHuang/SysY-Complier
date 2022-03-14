@@ -6,9 +6,9 @@ compUnit:   decl compUnit_
         |   funcDef compUnit_
         ;
 
-compUnit_:  ((decl compUnit_) 
-        | (funcDef compUnit_))
-        ?
+compUnit_:  decl compUnit_
+        |   funcDef compUnit_
+        |
         ;
 
 decl    :   constDecl
