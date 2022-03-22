@@ -1,11 +1,11 @@
 
-// Generated from SysYParser.g4 by ANTLR 4.9.2
+// Generated from lib/Frontend/SysYParser.g4 by ANTLR 4.9.2
 
 #pragma once
 
 
 #include "antlr4-runtime.h"
-#include "SysYParserVisitor.h"
+#include "sysy/Frontend/SysYParserVisitor.h"
 
 
 /**
@@ -16,10 +16,6 @@ class  SysYParserBaseVisitor : public SysYParserVisitor {
 public:
 
   virtual antlrcpp::Any visitCompUnit(SysYParser::CompUnitContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitCompUnit_(SysYParser::CompUnit_Context *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -44,6 +40,10 @@ public:
   }
 
   virtual antlrcpp::Any visitVarDecl(SysYParser::VarDeclContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitVarDecl_in(SysYParser::VarDecl_inContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -76,6 +76,10 @@ public:
   }
 
   virtual antlrcpp::Any visitBlockItem(SysYParser::BlockItemContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitStmt_in(SysYParser::Stmt_inContext *ctx) override {
     return visitChildren(ctx);
   }
 

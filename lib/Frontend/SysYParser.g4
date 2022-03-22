@@ -2,13 +2,8 @@ parser grammar SysYParser;
 
 options { tokenVocab=SysYLexer;}
 
-compUnit:   decl compUnit_
-        |   funcDef compUnit_
-        ;
-
-compUnit_:  decl compUnit_
-        |   funcDef compUnit_
-        |
+compUnit:   decl compUnit EOF
+        |   funcDef compUnit EOF
         ;
 
 decl    :   constDecl
@@ -27,6 +22,8 @@ constInitVal:   constExp
         ;
 
 varDecl :   bType varDef (COMMA varDef)* SEMI;
+
+varDecl_in  : bType varDef (COMMA varDef)*;
 
 varDef  :   Ident (LSBRA constExp RSBRA)*
         |   Ident (LSBRA constExp RSBRA)* AGN initVal
@@ -52,10 +49,15 @@ blockItem:  decl
         |   stmt
         ;
 
+stmt_in :   lVal AGN exp
+        |   exp?   
+        ;                  
+
 stmt    :   lVal AGN exp SEMI 
         |   exp? SEMI 
         |   block
         |   IF LBRA cond RBRA stmt (ELSE stmt)?
+        |   FOR LBRA (stmt_in|varDecl_in) SEMI cond SEMI stmt_in RBRA stmt
         |   WHILE LBRA cond RBRA stmt
         |   BREAK SEMI 
         |   CONTINUE SEMI

@@ -4,9 +4,9 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/usr/include/llvm-14",
-                "/usr/include/llvm-c-14",
-                "/usr/local/include/antlr4-runtime"
+                "/usr/local/include/antlr4-runtime",
+                "/usr/include/llvm-15",
+                "/usr/include/llvm-c-15"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",

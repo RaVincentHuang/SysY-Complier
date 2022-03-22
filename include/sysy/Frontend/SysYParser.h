@@ -1,5 +1,5 @@
 
-// Generated from SysYParser.g4 by ANTLR 4.9.2
+// Generated from lib/Frontend/SysYParser.g4 by ANTLR 4.9.2
 
 #pragma once
 
@@ -12,23 +12,23 @@
 class  SysYParser : public antlr4::Parser {
 public:
   enum {
-    INT = 1, CONST = 2, VOID = 3, IF = 4, ELSE = 5, WHILE = 6, BREAK = 7, 
-    CONTINUE = 8, RETURN = 9, AGN = 10, ADD = 11, SUB = 12, MUL = 13, DIV = 14, 
-    MOD = 15, EQL = 16, NEQ = 17, LES = 18, GRT = 19, LEQ = 20, GEQ = 21, 
-    NOT = 22, AND = 23, OR = 24, Ident = 25, DEC = 26, OCT = 27, HEX = 28, 
-    COMMA = 29, SEMI = 30, LBRA = 31, RBRA = 32, LSBRA = 33, RSBRA = 34, 
-    LCBRA = 35, RCBRA = 36, WS = 37, SL_COMMENT = 38
+    INT = 1, CONST = 2, VOID = 3, IF = 4, ELSE = 5, WHILE = 6, FOR = 7, 
+    BREAK = 8, CONTINUE = 9, RETURN = 10, AGN = 11, ADD = 12, SUB = 13, 
+    MUL = 14, DIV = 15, MOD = 16, EQL = 17, NEQ = 18, LES = 19, GRT = 20, 
+    LEQ = 21, GEQ = 22, NOT = 23, AND = 24, OR = 25, Ident = 26, DEC = 27, 
+    OCT = 28, HEX = 29, COMMA = 30, SEMI = 31, LBRA = 32, RBRA = 33, LSBRA = 34, 
+    RSBRA = 35, LCBRA = 36, RCBRA = 37, WS = 38, SL_COMMENT = 39, COMMENT = 40
   };
 
   enum {
-    RuleCompUnit = 0, RuleCompUnit_ = 1, RuleDecl = 2, RuleConstDecl = 3, 
-    RuleBType = 4, RuleConstDef = 5, RuleConstInitVal = 6, RuleVarDecl = 7, 
-    RuleVarDef = 8, RuleInitVal = 9, RuleFuncDef = 10, RuleFuncType = 11, 
-    RuleFuncFParams = 12, RuleFuncFParam = 13, RuleBlock = 14, RuleBlockItem = 15, 
-    RuleStmt = 16, RuleExp = 17, RuleCond = 18, RuleLVal = 19, RulePrimaryExp = 20, 
-    RuleNumber = 21, RuleUnaryExp = 22, RuleUnaryOp = 23, RuleFuncRParams = 24, 
-    RuleMulExp = 25, RuleAddExp = 26, RuleRelExp = 27, RuleEqExp = 28, RuleLAndExp = 29, 
-    RuleLOrExp = 30, RuleConstExp = 31, RuleIntConst = 32
+    RuleCompUnit = 0, RuleDecl = 1, RuleConstDecl = 2, RuleBType = 3, RuleConstDef = 4, 
+    RuleConstInitVal = 5, RuleVarDecl = 6, RuleVarDecl_in = 7, RuleVarDef = 8, 
+    RuleInitVal = 9, RuleFuncDef = 10, RuleFuncType = 11, RuleFuncFParams = 12, 
+    RuleFuncFParam = 13, RuleBlock = 14, RuleBlockItem = 15, RuleStmt_in = 16, 
+    RuleStmt = 17, RuleExp = 18, RuleCond = 19, RuleLVal = 20, RulePrimaryExp = 21, 
+    RuleNumber = 22, RuleUnaryExp = 23, RuleUnaryOp = 24, RuleFuncRParams = 25, 
+    RuleMulExp = 26, RuleAddExp = 27, RuleRelExp = 28, RuleEqExp = 29, RuleLAndExp = 30, 
+    RuleLOrExp = 31, RuleConstExp = 32, RuleIntConst = 33
   };
 
   explicit SysYParser(antlr4::TokenStream *input);
@@ -42,13 +42,13 @@ public:
 
 
   class CompUnitContext;
-  class CompUnit_Context;
   class DeclContext;
   class ConstDeclContext;
   class BTypeContext;
   class ConstDefContext;
   class ConstInitValContext;
   class VarDeclContext;
+  class VarDecl_inContext;
   class VarDefContext;
   class InitValContext;
   class FuncDefContext;
@@ -57,6 +57,7 @@ public:
   class FuncFParamContext;
   class BlockContext;
   class BlockItemContext;
+  class Stmt_inContext;
   class StmtContext;
   class ExpContext;
   class CondContext;
@@ -80,7 +81,8 @@ public:
     CompUnitContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     DeclContext *decl();
-    CompUnit_Context *compUnit_();
+    CompUnitContext *compUnit();
+    antlr4::tree::TerminalNode *EOF();
     FuncDefContext *funcDef();
 
 
@@ -89,21 +91,6 @@ public:
   };
 
   CompUnitContext* compUnit();
-
-  class  CompUnit_Context : public antlr4::ParserRuleContext {
-  public:
-    CompUnit_Context(antlr4::ParserRuleContext *parent, size_t invokingState);
-    virtual size_t getRuleIndex() const override;
-    DeclContext *decl();
-    CompUnit_Context *compUnit_();
-    FuncDefContext *funcDef();
-
-
-    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-   
-  };
-
-  CompUnit_Context* compUnit_();
 
   class  DeclContext : public antlr4::ParserRuleContext {
   public:
@@ -208,6 +195,23 @@ public:
   };
 
   VarDeclContext* varDecl();
+
+  class  VarDecl_inContext : public antlr4::ParserRuleContext {
+  public:
+    VarDecl_inContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    BTypeContext *bType();
+    std::vector<VarDefContext *> varDef();
+    VarDefContext* varDef(size_t i);
+    std::vector<antlr4::tree::TerminalNode *> COMMA();
+    antlr4::tree::TerminalNode* COMMA(size_t i);
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  VarDecl_inContext* varDecl_in();
 
   class  VarDefContext : public antlr4::ParserRuleContext {
   public:
@@ -348,6 +352,21 @@ public:
 
   BlockItemContext* blockItem();
 
+  class  Stmt_inContext : public antlr4::ParserRuleContext {
+  public:
+    Stmt_inContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    LValContext *lVal();
+    antlr4::tree::TerminalNode *AGN();
+    ExpContext *exp();
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  Stmt_inContext* stmt_in();
+
   class  StmtContext : public antlr4::ParserRuleContext {
   public:
     StmtContext(antlr4::ParserRuleContext *parent, size_t invokingState);
@@ -355,7 +374,8 @@ public:
     LValContext *lVal();
     antlr4::tree::TerminalNode *AGN();
     ExpContext *exp();
-    antlr4::tree::TerminalNode *SEMI();
+    std::vector<antlr4::tree::TerminalNode *> SEMI();
+    antlr4::tree::TerminalNode* SEMI(size_t i);
     BlockContext *block();
     antlr4::tree::TerminalNode *IF();
     antlr4::tree::TerminalNode *LBRA();
@@ -364,6 +384,10 @@ public:
     std::vector<StmtContext *> stmt();
     StmtContext* stmt(size_t i);
     antlr4::tree::TerminalNode *ELSE();
+    antlr4::tree::TerminalNode *FOR();
+    std::vector<Stmt_inContext *> stmt_in();
+    Stmt_inContext* stmt_in(size_t i);
+    VarDecl_inContext *varDecl_in();
     antlr4::tree::TerminalNode *WHILE();
     antlr4::tree::TerminalNode *BREAK();
     antlr4::tree::TerminalNode *CONTINUE();

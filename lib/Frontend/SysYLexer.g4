@@ -10,6 +10,7 @@ VOID:   'void';
 IF  :   'if';
 ELSE:   'else';
 WHILE:  'while';
+FOR:    'for';
 BREAK:  'break';
 CONTINUE:   'continue';
 RETURN: 'return';
@@ -50,3 +51,4 @@ RCBRA:  '}';
 
 WS  :   [ \t\n\r]+ ->  skip;
 SL_COMMENT  :   '//' .*? '\n' -> skip;
+COMMENT     :   '/*' .*? '*/' -> skip;

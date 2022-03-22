@@ -1,11 +1,11 @@
 
-// Generated from SysYParser.g4 by ANTLR 4.9.2
+// Generated from lib/Frontend/SysYParser.g4 by ANTLR 4.9.2
 
 #pragma once
 
 
 #include "antlr4-runtime.h"
-#include "SysYParser.h"
+#include "sysy/Frontend/SysYParser.h"
 
 
 
@@ -21,8 +21,6 @@ public:
    */
     virtual antlrcpp::Any visitCompUnit(SysYParser::CompUnitContext *context) = 0;
 
-    virtual antlrcpp::Any visitCompUnit_(SysYParser::CompUnit_Context *context) = 0;
-
     virtual antlrcpp::Any visitDecl(SysYParser::DeclContext *context) = 0;
 
     virtual antlrcpp::Any visitConstDecl(SysYParser::ConstDeclContext *context) = 0;
@@ -34,6 +32,8 @@ public:
     virtual antlrcpp::Any visitConstInitVal(SysYParser::ConstInitValContext *context) = 0;
 
     virtual antlrcpp::Any visitVarDecl(SysYParser::VarDeclContext *context) = 0;
+
+    virtual antlrcpp::Any visitVarDecl_in(SysYParser::VarDecl_inContext *context) = 0;
 
     virtual antlrcpp::Any visitVarDef(SysYParser::VarDefContext *context) = 0;
 
@@ -50,6 +50,8 @@ public:
     virtual antlrcpp::Any visitBlock(SysYParser::BlockContext *context) = 0;
 
     virtual antlrcpp::Any visitBlockItem(SysYParser::BlockItemContext *context) = 0;
+
+    virtual antlrcpp::Any visitStmt_in(SysYParser::Stmt_inContext *context) = 0;
 
     virtual antlrcpp::Any visitStmt(SysYParser::StmtContext *context) = 0;
 

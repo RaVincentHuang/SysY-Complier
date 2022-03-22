@@ -1,5 +1,5 @@
 
-// Generated from SysYLexer.g4 by ANTLR 4.9.2
+// Generated from lib/Frontend/SysYLexer.g4 by ANTLR 4.9.2
 
 #pragma once
 
@@ -12,12 +12,12 @@
 class  SysYLexer : public antlr4::Lexer {
 public:
   enum {
-    INT = 1, CONST = 2, VOID = 3, IF = 4, ELSE = 5, WHILE = 6, BREAK = 7, 
-    CONTINUE = 8, RETURN = 9, AGN = 10, ADD = 11, SUB = 12, MUL = 13, DIV = 14, 
-    MOD = 15, EQL = 16, NEQ = 17, LES = 18, GRT = 19, LEQ = 20, GEQ = 21, 
-    NOT = 22, AND = 23, OR = 24, Ident = 25, DEC = 26, OCT = 27, HEX = 28, 
-    COMMA = 29, SEMI = 30, LBRA = 31, RBRA = 32, LSBRA = 33, RSBRA = 34, 
-    LCBRA = 35, RCBRA = 36, WS = 37, SL_COMMENT = 38
+    INT = 1, CONST = 2, VOID = 3, IF = 4, ELSE = 5, WHILE = 6, FOR = 7, 
+    BREAK = 8, CONTINUE = 9, RETURN = 10, AGN = 11, ADD = 12, SUB = 13, 
+    MUL = 14, DIV = 15, MOD = 16, EQL = 17, NEQ = 18, LES = 19, GRT = 20, 
+    LEQ = 21, GEQ = 22, NOT = 23, AND = 24, OR = 25, Ident = 26, DEC = 27, 
+    OCT = 28, HEX = 29, COMMA = 30, SEMI = 31, LBRA = 32, RBRA = 33, LSBRA = 34, 
+    RSBRA = 35, LCBRA = 36, RCBRA = 37, WS = 38, SL_COMMENT = 39, COMMENT = 40
   };
 
   explicit SysYLexer(antlr4::CharStream *input);

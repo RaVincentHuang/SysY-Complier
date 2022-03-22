@@ -12,6 +12,7 @@
 #include <iostream>
 
 #include "sysy/Support/CommandLine.h"
+#include "sysy/Frontend/Frontend.h"
 
 using namespace llvm;
 using namespace sysy;
@@ -22,14 +23,14 @@ cl::opt<std::string> InputFilename(cl::Positional, cl::desc("<input-sysy-filenam
 cl::opt<std::string> OutputFilename("o", cl::desc("Specify output filename"), 
                                 cl::value_desc("filename"), cl::init("a"));
 
+cl::opt<bool> Src("src", cl::desc("print the source code."));
 cl::opt<bool> Ast("ast", cl::desc("show the ast of the sysy file"));
 cl::opt<bool> Mlir("mlir", cl::desc("show the mlir file of the sysy file"));
-
-
 
 int main(int argc, const char* argv[])
 {
     cl::ParseCommandLineOptions(argc, argv);
     std::cout << InputFilename << std::endl;
+    FrontendMain(InputFilename);
     return 0;
 }
