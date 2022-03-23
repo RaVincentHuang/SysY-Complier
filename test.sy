@@ -1,3 +1,5 @@
+int x = 1 + 1;
+
 int gcd(int a, int b) 
 {
     if(b)

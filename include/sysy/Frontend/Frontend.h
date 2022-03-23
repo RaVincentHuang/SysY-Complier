@@ -8,13 +8,7 @@
 namespace sysy
 {
 
-class MyVisitor : public SysYParserBaseVisitor 
-{
- public:
-    void printOpt(SysYParser::CompUnitContext* ctx);
-};
-
-int FrontendMain(const std::string& filename);
+int FrontendMain(const std::string& filename, const std::string& dump);
 
 
 }

@@ -2,6 +2,9 @@
 #include "antlr4-runtime/ANTLRInputStream.h"
 #include "antlr4-runtime/tree/ParseTreeWalker.h"
 #include "sysy/Frontend/Frontend.h"
+#include "sysy/Frontend/SysYVisitor.h"
+#include "sysy/Support/debug.h"
+#include "sysy/Support/common.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -9,15 +12,7 @@
 namespace sysy
 {
 
-void MyVisitor::printOpt(SysYParser::CompUnitContext* ctx)
-{
-    auto vec = ctx->children;
-        std::cout << vec.size() << std::endl;
-        for(auto iter: vec)
-            std::cout<< iter->toString() << std::endl << iter->getText() << std::endl;
-}
-
-int FrontendMain(const std::string& filename) 
+int FrontendMain(const std::string& filename, const std::string& Gen) 
 {
     std::ifstream infile(filename);
     std::stringstream buf;
@@ -27,8 +22,13 @@ int FrontendMain(const std::string& filename)
     SysYLexer lexer(&inputStream);
     antlr4::CommonTokenStream tokens(&lexer);
     SysYParser parser(&tokens);
-    MyVisitor visitor;
-    visitor.printOpt(parser.compUnit());
+    SysYVisitor visitor(parser);
+    if(Gen == "cst")
+        visitor.printCst(parser.compUnit(), 1);
+    else if(Gen == "src")
+        visitor.printSrc(parser.compUnit());
+    else
+        TODO();
     return 0;
 }
 
