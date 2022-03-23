@@ -24,8 +24,8 @@ void SysYVisitor::printSrc(SysYParser::CompUnitContext* ctx)
     size_t num = ctx->getAltNumber();
     std::cout << parser.getRuleNames().at(num) << std::endl;
     std::cout << vec.size() << std::endl;
-        for(auto iter: vec)
-            std::cout<< iter->toString() << std::endl << iter->getText() << std::endl;
+    for(auto iter: vec)
+        std::cout<< iter->toString() << std::endl << iter->getText() << std::endl;
 }
 
 antlrcpp::Any SysYVisitor::visitCompUnit(SysYParser::CompUnitContext *ctx){}

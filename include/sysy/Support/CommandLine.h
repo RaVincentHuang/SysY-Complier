@@ -3,7 +3,8 @@
 
 #include "llvm/Support/CommandLine.h"
 
-namespace sysy {
+namespace sysy 
+{
     extern llvm::cl::OptionCategory SysyOptCategory;
 }
 
