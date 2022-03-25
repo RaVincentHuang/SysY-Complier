@@ -21,6 +21,8 @@ public:
     
     antlrcpp::Any visitCompUnit(SysYParser::CompUnitContext *ctx) override;
 
+    antlrcpp::Any visitElement(SysYParser::ElementContext *ctx) override;
+
     antlrcpp::Any visitDecl(SysYParser::DeclContext *ctx) override;
   
     antlrcpp::Any visitConstDecl(SysYParser::ConstDeclContext *ctx) override;

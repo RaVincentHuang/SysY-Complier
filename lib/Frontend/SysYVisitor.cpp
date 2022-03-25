@@ -1,4 +1,5 @@
 #include "sysy/Frontend/SysYVisitor.h"
+#include "sysy/Frontend/SysYParser.h"
 #include "sysy/Support/common.h"
 
 namespace sysy
@@ -6,14 +7,20 @@ namespace sysy
 void SysYVisitor::printCst(antlr4::ParserRuleContext *ctx, int depth)
 {
     for(int i = 1;i < depth; i++)
-        std::cout << "|\t";
+        if (i == 1)
+            std::cout << "\t";
+        else
+            std::cout << "|\t";
     if(ctx->depth() != depth)
     {
         std::cout <<"|--> " << "\033[32m<\033[m" << ctx->toStringTree() << "\033[32m>\033[m" << std::endl;
         return;
     }
+
     size_t num = ctx->getRuleIndex();
-    std::cout << "|--> " << "\033[36m[\033[m" << parser.getRuleNames().at(num) << "\033[36m]\033[m" << std::endl;
+    if(ctx->getRuleIndex() != SysYParser::RuleCompUnit)
+        std::cout << "|--> ";
+    std::cout << "\033[36m[\033[m" << parser.getRuleNames().at(num) << "\033[36m]\033[m" << std::endl;
     for(auto child : ctx->children)
         printCst((antlr4::ParserRuleContext *)child, depth + 1);
 }
@@ -28,7 +35,12 @@ void SysYVisitor::printSrc(SysYParser::CompUnitContext* ctx)
         std::cout<< iter->toString() << std::endl << iter->getText() << std::endl;
 }
 
-antlrcpp::Any SysYVisitor::visitCompUnit(SysYParser::CompUnitContext *ctx){}
+antlrcpp::Any SysYVisitor::visitCompUnit(SysYParser::CompUnitContext *ctx)
+{
+    
+}
+
+antlrcpp::Any SysYVisitor::visitElement(SysYParser::ElementContext *ctx) {}
 
 antlrcpp::Any SysYVisitor::visitDecl(SysYParser::DeclContext *ctx){}
   

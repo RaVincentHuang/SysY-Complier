@@ -5,7 +5,7 @@
 
 
 #include "antlr4-runtime.h"
-#include "sysy/Frontend/SysYParserVisitor.h"
+#include "SysYParserVisitor.h"
 
 
 /**
@@ -16,6 +16,10 @@ class  SysYParserBaseVisitor : public SysYParserVisitor {
 public:
 
   virtual antlrcpp::Any visitCompUnit(SysYParser::CompUnitContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitElement(SysYParser::ElementContext *ctx) override {
     return visitChildren(ctx);
   }
 

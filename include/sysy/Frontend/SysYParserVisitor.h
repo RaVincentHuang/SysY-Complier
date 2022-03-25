@@ -5,7 +5,7 @@
 
 
 #include "antlr4-runtime.h"
-#include "sysy/Frontend/SysYParser.h"
+#include "SysYParser.h"
 
 
 
@@ -20,6 +20,8 @@ public:
    * Visit parse trees produced by SysYParser.
    */
     virtual antlrcpp::Any visitCompUnit(SysYParser::CompUnitContext *context) = 0;
+
+    virtual antlrcpp::Any visitElement(SysYParser::ElementContext *context) = 0;
 
     virtual antlrcpp::Any visitDecl(SysYParser::DeclContext *context) = 0;
 

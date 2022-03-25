@@ -21,14 +21,15 @@ public:
   };
 
   enum {
-    RuleCompUnit = 0, RuleDecl = 1, RuleConstDecl = 2, RuleBType = 3, RuleConstDef = 4, 
-    RuleConstInitVal = 5, RuleVarDecl = 6, RuleVarDecl_in = 7, RuleVarDef = 8, 
-    RuleInitVal = 9, RuleFuncDef = 10, RuleFuncType = 11, RuleFuncFParams = 12, 
-    RuleFuncFParam = 13, RuleBlock = 14, RuleBlockItem = 15, RuleStmt_in = 16, 
-    RuleStmt = 17, RuleExp = 18, RuleCond = 19, RuleLVal = 20, RulePrimaryExp = 21, 
-    RuleNumber = 22, RuleUnaryExp = 23, RuleUnaryOp = 24, RuleFuncRParams = 25, 
-    RuleMulExp = 26, RuleAddExp = 27, RuleRelExp = 28, RuleEqExp = 29, RuleLAndExp = 30, 
-    RuleLOrExp = 31, RuleConstExp = 32, RuleIntConst = 33
+    RuleCompUnit = 0, RuleElement = 1, RuleDecl = 2, RuleConstDecl = 3, 
+    RuleBType = 4, RuleConstDef = 5, RuleConstInitVal = 6, RuleVarDecl = 7, 
+    RuleVarDecl_in = 8, RuleVarDef = 9, RuleInitVal = 10, RuleFuncDef = 11, 
+    RuleFuncType = 12, RuleFuncFParams = 13, RuleFuncFParam = 14, RuleBlock = 15, 
+    RuleBlockItem = 16, RuleStmt_in = 17, RuleStmt = 18, RuleExp = 19, RuleCond = 20, 
+    RuleLVal = 21, RulePrimaryExp = 22, RuleNumber = 23, RuleUnaryExp = 24, 
+    RuleUnaryOp = 25, RuleFuncRParams = 26, RuleMulExp = 27, RuleAddExp = 28, 
+    RuleRelExp = 29, RuleEqExp = 30, RuleLAndExp = 31, RuleLOrExp = 32, 
+    RuleConstExp = 33, RuleIntConst = 34
   };
 
   explicit SysYParser(antlr4::TokenStream *input);
@@ -42,6 +43,7 @@ public:
 
 
   class CompUnitContext;
+  class ElementContext;
   class DeclContext;
   class ConstDeclContext;
   class BTypeContext;
@@ -80,10 +82,9 @@ public:
   public:
     CompUnitContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    DeclContext *decl();
     antlr4::tree::TerminalNode *EOF();
-    CompUnitContext *compUnit();
-    FuncDefContext *funcDef();
+    std::vector<ElementContext *> element();
+    ElementContext* element(size_t i);
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -91,6 +92,20 @@ public:
   };
 
   CompUnitContext* compUnit();
+
+  class  ElementContext : public antlr4::ParserRuleContext {
+  public:
+    ElementContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    DeclContext *decl();
+    FuncDefContext *funcDef();
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  ElementContext* element();
 
   class  DeclContext : public antlr4::ParserRuleContext {
   public:

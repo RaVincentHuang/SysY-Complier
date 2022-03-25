@@ -2,8 +2,10 @@ parser grammar SysYParser;
 
 options { tokenVocab=SysYLexer;}
 
-compUnit:   decl compUnit? EOF
-        |   funcDef compUnit? EOF
+compUnit:   element* EOF;
+
+element :   decl
+        |   funcDef
         ;
 
 decl    :   constDecl
