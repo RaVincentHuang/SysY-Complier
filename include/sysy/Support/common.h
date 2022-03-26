@@ -2,6 +2,25 @@
 #define SYSY_COMMON_H
 
 #include <iostream>
+
+#define SET_IT_PARENT(child)        \
+    if(child != nullptr)            \
+    {                               \
+        child->setParent(this);     \
+        this->addChildren(child);   \            
+    }
+
+#define SET_IT_PARENT_VEC(vec)      \
+    for(auto iter : vec)            \
+    {                               \
+        iter->setParent(this);      \
+        this->addChildren(iter);   \
+    }
+
+#define FREE_VEC(vec)               \
+    for(auto iter : vec)            \
+        delete iter;
+
 // TODO  
 #define TODO() \
     std::cout << "\033[30;43mFeatures yet to be added:\033[m" << std::endl;    \

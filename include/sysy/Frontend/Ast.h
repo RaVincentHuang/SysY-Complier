@@ -120,8 +120,8 @@ public:
     std::vector<FuncDefNode*> funcDef;
     std::vector<DeclNode*> decl;
 
-    CompUnitNode(const Location& _loc, std::vector<FuncDefNode*> funcDef, 
-                std::vector<DeclNode*> decl);
+    CompUnitNode(const Location& _loc, std::vector<FuncDefNode*> _funcDef, 
+                std::vector<DeclNode*> _decl);
     ~CompUnitNode();
 
     // Need override getSignature.
@@ -143,8 +143,8 @@ public:
     FuncParamListNode* funcParamList;
     BlockNode* block;
 
-    FuncDefNode(const Location& _loc, AstType funcType, std::string funcName,
-                FuncParamListNode* funcParamList, BlockNode* block);
+    FuncDefNode(const Location& _loc, AstType _funcType, std::string _funcName,
+                FuncParamListNode* _funcParamList, BlockNode* _block);
     ~FuncDefNode();
 
     std::string getSignature() const override;
@@ -212,8 +212,9 @@ public:
     bool is_const;
     AstType type;
 
-    DeclNode(AstKind _kind, const Location& _loc, bool _is_const, AstType _type);
-    ~DeclNode();
+    DeclNode::DeclNode(AstKind _kind, const Location& _loc, bool _is_const, AstType _type)
+            : StmtNode(_kind, _loc), is_const(_is_const), type(_type) {}
+    DeclNode::~DeclNode() {}
 
     std::string getSignature() const override;
 
@@ -228,7 +229,7 @@ public:
     std::vector<ConstDefNode*> constDef;
 
     ConstDeclNode(const Location& _loc, AstType _type, 
-                    std::vector<ConstDeclNode*> _constDef);
+                    std::vector<ConstDefNode*> _constDef);
     ~ConstDeclNode();
 
     std::string getSignature() const override;
@@ -334,7 +335,7 @@ public:
     CondExprNode* cond;
     StmtNode* thenBlock,* elseBlock;
     
-    IfStmtNode(const Location& _loc, StmtNode* _thenBlock, StmtNode* _elseBlock);
+    IfStmtNode(const Location& _loc, CondExprNode* _cond, StmtNode* _thenBlock, StmtNode* _elseBlock);
     ~IfStmtNode();
 
     std::string getSignature() const override;
@@ -407,7 +408,7 @@ class ReturnStmtNode : public StmtNode
 public:
     ExprNode* expr;
 
-    ReturnStmtNode(const Location& _loc, ExprNode* expr);
+    ReturnStmtNode(const Location& _loc, ExprNode* _expr);
     ~ReturnStmtNode();
 
     std::string getSignature() const override;
@@ -558,11 +559,11 @@ class AddExprNode : public ExprNode
 {
 public:
     MulExprNode* mulExpr;
-    AddExprNode* AddExpr;
+    AddExprNode* addExpr;
     BinaryOp op;
 
     AddExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
-                    MulExprNode* _mulExpr, AddExprNode* _AddExpr, BinaryOp _op);
+                    MulExprNode* _mulExpr, AddExprNode* _addExpr, BinaryOp _op);
     AddExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
                     MulExprNode* _mulExpr);
     ~AddExprNode();
