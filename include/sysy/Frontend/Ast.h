@@ -49,22 +49,16 @@ public:
         AST_compUnit,
         AST_decl,
         AST_constDecl,
-        AST_bType,
         AST_constDef,
-        AST_constInitVal,
         AST_varDecl,
-        AST_varDecl_in,
         AST_varDef,
         AST_prototype,
         AST_initVal,
         AST_funcDef,
-        AST_funcType,
         AST_funcParams,
         AST_funcParam,
-        AST_block,
-        AST_blockItem,
-        AST_stmt_in,
         AST_stmt,
+        AST_block,
         AST_assignStmt,
         AST_expStmt,
         AST_ifStmt,
@@ -77,17 +71,13 @@ public:
         AST_cond,
         AST_lVal,
         AST_primaryExp,
-        AST_number,
         AST_unaryExp,
-        AST_unaryOp,
         AST_mulExp,
         AST_addExp,
         AST_relExp,
         AST_eqExp,
         AST_lAndExp,
         AST_lOrExp,
-        AST_constExp,
-        AST_intConst,
         AST_EOF,
         AST_Undefined
     };
@@ -203,19 +193,18 @@ public:
             : AstNode(_kind, _loc) {}
     ~StmtNode() {}
 
+    std::string getSignature() const override;
+
     /// LLVM style RTTI
     static bool classof(const AstNode* c)
     {
-        bool decl = (c->getKind() == AST_decl || c->getKind() == AST_varDecl 
-                    || c->getKind() == AST_varDecl_in || c->getKind() == AST_constDecl);
+        bool decl = c->getKind() >= AST_decl && c->getKind() <= AST_prototype;;
 
-        bool stmt = (c->getKind() == AST_stmt);
+        bool stmt = c->getKind() >= AST_stmt && c->getKind() <= AST_returnStmt;
 
         return decl || stmt;
     }
 };
-
-
 
 class DeclNode : public StmtNode
 {
@@ -226,10 +215,11 @@ public:
     DeclNode(AstKind _kind, const Location& _loc, bool _is_const, AstType _type);
     ~DeclNode();
 
+    std::string getSignature() const override;
+
     /// LLVM style RTTI
-    static bool classof(const AstNode* c) { return c->getKind() == AST_decl 
-                || c->getKind() == AST_varDecl || c->getKind() == AST_varDecl_in 
-                || c->getKind() == AST_constDecl; }
+    static bool classof(const AstNode* c) { return c->getKind() >= AST_decl 
+                                                && c->getKind() <= AST_prototype; }
 };
 
 class ConstDeclNode : public DeclNode
@@ -240,6 +230,8 @@ public:
     ConstDeclNode(const Location& _loc, AstType _type, 
                     std::vector<ConstDeclNode*> _constDef);
     ~ConstDeclNode();
+
+    std::string getSignature() const override;
 
     /// LLVM style RTTI
     static bool classof(const AstNode* c) { return c->getKind() == AST_constDecl; }
@@ -254,6 +246,8 @@ public:
                     std::vector<VarDefNode*> _varDef);
     ~VarDeclNode();
 
+    std::string getSignature() const override;
+
     /// LLVM style RTTI
     static bool classof(const AstNode* c) { return c->getKind() == AST_varDecl; }
 };
@@ -267,6 +261,8 @@ public:
     ConstDefNode(const Location& _loc, std::vector<ExprNode*> _constExpr, 
             InitValNode* _constInitVal);
     ~ConstDefNode();
+
+    std::string getSignature() const override;
 
     /// LLVM style RTTI
     static bool classof(const AstNode* c) { return c->getKind() == AST_constDef; }
@@ -283,8 +279,10 @@ public:
     VarDefNode(const Location& _loc, std::vector<ExprNode*> _expr);
     ~VarDefNode();
 
+    std::string getSignature() const override;
+
     /// LLVM style RTTI
-    static bool classof(const AstNode* c) { return c->getKind() == AST_constDef; }
+    static bool classof(const AstNode* c) { return c->getKind() == AST_varDef; }
 };
 
 class InitValNode : public AstNode
@@ -294,6 +292,8 @@ public:
 
     InitValNode(const Location& _loc, std::vector<ExprNode*> _initItem);
     ~InitValNode();
+
+    std::string getSignature() const override;
 
     /// LLVM style RTTI
     static bool classof(const AstNode* c) { return c->getKind() == AST_initVal; }
@@ -308,6 +308,8 @@ public:
     AssignStmtNode(const Location& _loc, LvalNode* _lval, ExprNode* _expr);
     ~AssignStmtNode();
 
+    std::string getSignature() const override;
+
     /// LLVM style RTTI
     static bool classof(const AstNode* c) { return c->getKind() == AST_assignStmt; }
 };
@@ -319,6 +321,8 @@ public:
 
     ExprStmtNode(const Location& _loc, ExprNode* _expr);
     ~ExprStmtNode();
+
+    std::string getSignature() const override;
 
     /// LLVM style RTTI
     static bool classof(const AstNode* c) { return c->getKind() == AST_ifStmt; }
@@ -332,6 +336,8 @@ public:
     
     IfStmtNode(const Location& _loc, StmtNode* _thenBlock, StmtNode* _elseBlock);
     ~IfStmtNode();
+
+    std::string getSignature() const override;
 
     /// LLVM style RTTI
     static bool classof(const AstNode* c) { return c->getKind() == AST_expStmt; }
@@ -347,6 +353,8 @@ public:
                 StmtNode* _increment, StmtNode* _stmt);
     ~ForStmtNode();
 
+    std::string getSignature() const override;
+
     /// LLVM style RTTI
     static bool classof(const AstNode* c) { return c->getKind() == AST_forStmt; }
 };
@@ -360,6 +368,8 @@ public:
     WhileStmtNode(const Location& _loc, CondExprNode* _cond, StmtNode* _stmt);
     ~WhileStmtNode();
 
+    std::string getSignature() const override;
+
     /// LLVM style RTTI
     static bool classof(const AstNode* c) { return c->getKind() == AST_whileStmt; }
 };
@@ -371,6 +381,8 @@ public:
 
     BreakStmtNode(const Location& _loc, bool _is_break);
     ~BreakStmtNode();
+
+    std::string getSignature() const override;
 
     /// LLVM style RTTI
     static bool classof(const AstNode* c) { return c->getKind() == AST_breakStmt; }
@@ -384,6 +396,8 @@ public:
     ContinueStmtNode(const Location& _loc, bool _is_contiune);
     ~ContinueStmtNode();
 
+    std::string getSignature() const override;
+
     /// LLVM style RTTI
     static bool classof(const AstNode* c) { return c->getKind() == AST_continueStmt; }
 };
@@ -395,6 +409,8 @@ public:
 
     ReturnStmtNode(const Location& _loc, ExprNode* expr);
     ~ReturnStmtNode();
+
+    std::string getSignature() const override;
 
     /// LLVM style RTTI
     static bool classof(const AstNode* c) { return c->getKind() == AST_returnStmt; }
@@ -411,6 +427,8 @@ public:
                     std::string _funcName, FuncParamListNode* _funcParamList);
     ~PrototypeNode();
 
+    std::string getSignature() const override;
+
     /// LLVM style RTTI
     static bool classof(const AstNode* c) { return c->getKind() == AST_prototype; }
 };
@@ -422,6 +440,8 @@ public:
 
     BlockNode(const Location& _loc, std::vector<StmtNode*> _blockItems);
     ~BlockNode();
+
+    std::string getSignature() const override;
 
     /// LLVM style RTTI
     static bool classof(const AstNode* c) { return c->getKind() == AST_block; }
@@ -437,10 +457,12 @@ public:
     ExprNode(AstKind _kind, const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type);
     ~ExprNode();
 
+    std::string getSignature() const override;
+
     void setImmediate(Immediate _immediate);
 
     /// LLVM style RTTI
-    static bool classof(const AstNode* c) { return c->getKind() >= AST_exp && c->getKind() <= AST_intConst; }
+    static bool classof(const AstNode* c) { return c->getKind() >= AST_exp && c->getKind() <= AST_lOrExp; }
 };
 
 class CondExprNode : public ExprNode
@@ -451,6 +473,8 @@ public:
     CondExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
                     LOrExprNode* _lOrExpr);
     ~CondExprNode();
+
+    std::string getSignature() const override;
 
     /// LLVM style RTTI
     static bool classof(const AstNode* c) { return c->getKind() == AST_cond; }
@@ -468,6 +492,8 @@ public:
                     LAndExprNode* _lAndExpr, LOrExprNode* _lOrExpr);
     ~LOrExprNode();
 
+    std::string getSignature() const override;
+
     /// LLVM style RTTI
     static bool classof(const AstNode* c) { return c->getKind() == AST_lOrExp; }
 };
@@ -483,6 +509,8 @@ public:
     LAndExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
                     EqExprNode* _eqExpr, LAndExprNode* _lAndExpr);
     ~LAndExprNode();
+
+    std::string getSignature() const override;
 
     /// LLVM style RTTI
     static bool classof(const AstNode* c) { return c->getKind() == AST_lAndExp; }
@@ -501,6 +529,8 @@ public:
                     RelExprNode* _relExpr, EqExprNode* _eqExpr, RelationOp _op);
     ~EqExprNode();
 
+    std::string getSignature() const override;
+
     /// LLVM style RTTI
     static bool classof(const AstNode* c) { return c->getKind() == AST_eqExp; }
 };
@@ -517,6 +547,8 @@ public:
     RelExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
                     AddExprNode* _addExpr, RelExprNode* _relExpr, RelationOp _op);
     ~RelExprNode();
+
+    std::string getSignature() const override;
 
     /// LLVM style RTTI
     static bool classof(const AstNode* c) { return c->getKind() == AST_relExp; }
@@ -535,6 +567,8 @@ public:
                     MulExprNode* _mulExpr);
     ~AddExprNode();
 
+    std::string getSignature() const override;
+
     /// LLVM style RTTI
     static bool classof(const AstNode* c) { return c->getKind() == AST_addExp; }
 };
@@ -551,6 +585,8 @@ public:
     MulExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
                     UnaryExprNode* _unaryExpr);
     ~MulExprNode();
+
+    std::string getSignature() const override;
 
     /// LLVM style RTTI
     static bool classof(const AstNode* c) { return c->getKind() == AST_mulExp; }
@@ -575,6 +611,8 @@ public:
                     UnaryOp _op, UnaryExprNode* _unaryExpr);
     ~UnaryExprNode();
 
+    std::string getSignature() const override;
+
     /// LLVM style RTTI
     static bool classof(const AstNode* c) { return c->getKind() == AST_unaryExp; }
 
@@ -597,6 +635,8 @@ public:
                         Immediate _number);
     ~PrimaryExprNode();
 
+    std::string getSignature() const override;
+
     /// LLVM style RTTI
     static bool classof(const AstNode* c) { return c->getKind() == AST_primaryExp; }
 };
@@ -610,6 +650,8 @@ public:
     LvalNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
                 std::string _variable, std::vector<ExprNode*> _expr);
     ~LvalNode();
+
+    std::string getSignature() const override;
 
     /// LLVM style RTTI
     static bool classof(const AstNode* c) { return c->getKind() == AST_lVal; }
