@@ -5,7 +5,7 @@
 
 
 #include "antlr4-runtime.h"
-#include "SysYParser.h"
+#include "sysy/Frontend/SysYParser.h"
 
 
 

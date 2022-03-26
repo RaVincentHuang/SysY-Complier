@@ -5,7 +5,7 @@
 
 
 #include "antlr4-runtime.h"
-#include "SysYParserVisitor.h"
+#include "sysy/Frontend/SysYParserVisitor.h"
 
 
 /**

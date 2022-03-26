@@ -41,7 +41,7 @@ funcType:   VOID
         |   INT
         ;
 
-funcFParams:funcFParam (COMMA funcFParam)*;
+funcFParams: funcFParam (COMMA funcFParam)*;
 
 funcFParam: bType Ident (LSBRA RSBRA (LSBRA exp RSBRA)*)?;
 
@@ -67,13 +67,13 @@ stmt    :   lVal AGN exp SEMI
         ;
 
 exp     :   addExp;
-
+ 
 cond    :   lOrExp;
 
 lVal    :   Ident (LSBRA exp RSBRA)*;
 
 primaryExp: LBRA exp RBRA 
-        | lVal 
+        | lVal
         | number
         ;
 

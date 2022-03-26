@@ -94,7 +94,10 @@ antlrcpp::Any SysYVisitor::visitFuncRParams(SysYParser::FuncRParamsContext *ctx)
   
 antlrcpp::Any SysYVisitor::visitMulExp(SysYParser::MulExpContext *ctx){}
   
-antlrcpp::Any SysYVisitor::visitAddExp(SysYParser::AddExpContext *ctx){}
+antlrcpp::Any SysYVisitor::visitAddExp(SysYParser::AddExpContext *ctx)
+{
+    
+}
   
 antlrcpp::Any SysYVisitor::visitRelExp(SysYParser::RelExpContext *ctx){}
   
