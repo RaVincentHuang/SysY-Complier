@@ -3,8 +3,10 @@
 #include "antlr4-runtime/tree/ParseTreeWalker.h"
 #include "sysy/Frontend/Frontend.h"
 #include "sysy/Frontend/SysYVisitor.h"
+#include "sysy/Frontend/SysyContext.h"
 #include "sysy/Support/debug.h"
 #include "sysy/Support/common.h"
+#include "llvm/Support/SMLoc.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -22,7 +24,12 @@ int FrontendMain(const std::string& filename, const std::string& Gen)
     SysYLexer lexer(&inputStream);
     antlr4::CommonTokenStream tokens(&lexer);
     SysYParser parser(&tokens);
-    SysYVisitor visitor(parser);
+    llvm::SMLoc IncludeLoc;
+    std::string Includedfile;
+    auto sourceMgr = ast::SysyContext::getInstance().getSourceMgr();
+    unsigned id =  sourceMgr->AddIncludeFile(filename, IncludeLoc, Includedfile);
+    auto memBuf = sourceMgr->getMemoryBuffer(id); 
+    SysYVisitor visitor(parser, memBuf);
     if(Gen == "cst")
         visitor.printCst(parser.compUnit(), 1);
     else if(Gen == "src")

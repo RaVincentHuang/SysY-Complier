@@ -2,6 +2,7 @@
 #define SYSY_SYSYVISITOR_H
 
 #include "sysy/Frontend/SysYParserBaseVisitor.h"
+#include "llvm/Support/MemoryBuffer.h"
 
 namespace sysy
 {
@@ -10,14 +11,24 @@ class SysYVisitor : public SysYParserBaseVisitor
 {
 protected:
     SysYParser& parser;
+    const llvm::MemoryBuffer* memoryBuffer;
 public:
-    SysYVisitor(SysYParser& _parser) : parser(_parser) {}
+    SysYVisitor(SysYParser& _parser, const llvm::MemoryBuffer* _memoryBuffer) 
+        : parser(_parser), memoryBuffer(_memoryBuffer) {}
 
     // ~SysYVisitor() {}
 
     void printCst(antlr4::ParserRuleContext *ctx, int depth);
 
     void printSrc(SysYParser::CompUnitContext* ctx);
+
+    ast::Location getContextLoc(antlr4::ParserRuleContext* ctx);
+
+    llvm::SMRange getContextRange(antlr4::ParserRuleContext* ctx);
+
+    std::vector<ExprNode*> constInitValDfs(SysYParser::ConstInitValContext *ctx);
+
+    std::vector<ExprNode*> varInitValDfs(SysYParser::InitValContext *ctx);
     
     antlrcpp::Any visitCompUnit(SysYParser::CompUnitContext *ctx) override;
 

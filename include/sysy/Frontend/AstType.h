@@ -13,13 +13,17 @@ enum AstType
     VOID = 0,
     INT,
     DOUBLE,
-    STRING
+    STRING,
+    UNKNOW
 };
 
 union Immediate
 {  
     int Integer;
     double DoubleFloat;
+    Immediate() {}
+    Immediate(int x) : Integer(x) {}
+    Immediate(double x) : DoubleFloat(x) {}
 };
 
 // class AstType

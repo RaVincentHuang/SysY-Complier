@@ -407,8 +407,10 @@ class ReturnStmtNode : public StmtNode
 {
 public:
     ExprNode* expr;
+    bool has_ret_val;
 
     ReturnStmtNode(const Location& _loc, ExprNode* _expr);
+    ReturnStmtNode(const Location& _loc);
     ~ReturnStmtNode();
 
     std::string getSignature() const override;
@@ -461,6 +463,8 @@ public:
     std::string getSignature() const override;
 
     void setImmediate(Immediate _immediate);
+
+    bool ready() { return is_const; }
 
     /// LLVM style RTTI
     static bool classof(const AstNode* c) { return c->getKind() >= AST_exp && c->getKind() <= AST_lOrExp; }
@@ -626,14 +630,11 @@ public:
 
     LvalNode* lval;
 
-    Immediate number;
-
     PrimaryExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
                         ExprNode* _expr);
     PrimaryExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
                         LvalNode* _lval);
-    PrimaryExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
-                        Immediate _number);
+    PrimaryExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type);
     ~PrimaryExprNode();
 
     std::string getSignature() const override;

@@ -218,7 +218,10 @@ std::string ContinueStmtNode::getSignature() const {}
 
 // ReturnStmtNode
 ReturnStmtNode::ReturnStmtNode(const Location& _loc, ExprNode* _expr) 
-    : StmtNode(AST_returnStmt, _loc), expr(_expr) { SET_IT_PARENT(expr); }
+    : StmtNode(AST_returnStmt, _loc), expr(_expr), has_ret_val(true) { SET_IT_PARENT(expr); }
+
+ReturnStmtNode::ReturnStmtNode(const Location& _loc) 
+    : StmtNode(AST_returnStmt, _loc), expr(nullptr), has_ret_val(false) {}
 
 ReturnStmtNode::~ReturnStmtNode() {}
 
@@ -430,22 +433,21 @@ std::string UnaryExprNode::getSignature() const {}
 PrimaryExprNode::PrimaryExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
                                     ExprNode* _expr)
     : ExprNode(AST_addExp, _loc, _is_const, _immediate, _type), expr(_expr),
-    lval(nullptr), number()
+    lval(nullptr)
 {
     SET_IT_PARENT(expr);
 }
 PrimaryExprNode::PrimaryExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
                                     LvalNode* _lval)
     : ExprNode(AST_addExp, _loc, _is_const, _immediate, _type), 
-    expr(nullptr), lval(_lval), number()
+    expr(nullptr), lval(_lval)
 {
     SET_IT_PARENT(lval);
 }
 
-PrimaryExprNode::PrimaryExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
-                                    Immediate _number)
+PrimaryExprNode::PrimaryExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type)
     : ExprNode(AST_addExp, _loc, _is_const, _immediate, _type),
-    expr(nullptr), lval(nullptr), number(_number) {}
+    expr(nullptr), lval(nullptr) {}
 
 PrimaryExprNode::~PrimaryExprNode() {}
 
