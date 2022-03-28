@@ -5,11 +5,11 @@ namespace sysy
 {
 namespace ast
 {
-enum BinaryOp {ADD = 0, SUB, MUL, DIV, MOD, NONE};
+enum BinaryOp {BOP_ADD = 0, BOP_SUB, BOP_MUL, BOP_DIV, BOP_MOD, BOP_NONE};
 
-enum UnaryOp {ADD = 0, SUB, NOT, NONE};
+enum UnaryOp {UOP_ADD = 0, UOP_SUB, UOP_NOT, UOP_NONE};
 
-enum RelationOp {EQL = 0, NEQ, LES, GRT, LEQ, GEQ, NONE};
+enum RelationOp {ROP_EQL = 0, ROP_NEQ, ROP_LES, ROP_GRT, ROP_LEQ, ROP_GEQ, ROP_NONE};
 } // namespace ast
 
 } // namespace sysy

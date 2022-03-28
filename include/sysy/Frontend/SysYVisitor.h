@@ -1,8 +1,11 @@
 #ifndef SYSY_SYSYVISITOR_H
 #define SYSY_SYSYVISITOR_H
 
-#include "sysy/Frontend/SysYParserBaseVisitor.h"
 #include "llvm/Support/MemoryBuffer.h"
+#include "sysy/Frontend/SysYParserBaseVisitor.h"
+#include "sysy/Frontend/Location.h"
+#include "sysy/Frontend/Ast.h"
+
 
 namespace sysy
 {
@@ -26,9 +29,9 @@ public:
 
     llvm::SMRange getContextRange(antlr4::ParserRuleContext* ctx);
 
-    std::vector<ExprNode*> constInitValDfs(SysYParser::ConstInitValContext *ctx);
+    std::vector<ast::ExprNode*> constInitValDfs(SysYParser::ConstInitValContext *ctx);
 
-    std::vector<ExprNode*> varInitValDfs(SysYParser::InitValContext *ctx);
+    std::vector<ast::ExprNode*> varInitValDfs(SysYParser::InitValContext *ctx);
     
     antlrcpp::Any visitCompUnit(SysYParser::CompUnitContext *ctx) override;
 

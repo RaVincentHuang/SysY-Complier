@@ -3,6 +3,7 @@
 
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/ADT/ArrayRef.h"
+#include "llvm/ADT/DenseMap.h"
 #include "sysy/Frontend/Location.h"
 #include "sysy/Frontend/AstType.h"
 #include "sysy/Frontend/SysYOp.h"
@@ -31,6 +32,7 @@ class PrototypeNode;
 
 
 class ExprNode;
+class AddExprNode;
 class CondExprNode;
 class LOrExprNode;
 class LAndExprNode;
@@ -39,7 +41,6 @@ class RelExprNode;
 class MulExprNode;
 class UnaryExprNode;
 class PrimaryExprNode;
-
 
 class AstNode
 {
@@ -96,7 +97,7 @@ public:
         , kind(AST_Undefined)
         , parent(nullptr) {}
     
-    virtual ~AstNode();
+    virtual ~AstNode() {}
 
     void setParent(AstNode* _parent) { parent = _parent; }
     void addChildren(AstNode* _children) { children.push_back(_children); }
@@ -111,7 +112,7 @@ public:
     virtual std::string getSignature() const = 0;
     std::string getText() const { return loc.getText().str(); }
 
-
+    virtual void printAst(int depth);
 }; // class ASTNode
 
 class CompUnitNode : public AstNode
@@ -131,6 +132,8 @@ public:
 
     llvm::StringRef getPath() const { return loc.getfile(); }
 
+    llvm::StringRef getStr() const { return "compUnit"; }
+
     /// LLVM style RTTI
     static bool classof(const AstNode* c) { return c->getKind() == AST_compUnit; }
 };
@@ -148,6 +151,8 @@ public:
     ~FuncDefNode();
 
     std::string getSignature() const override;
+
+    llvm::StringRef getStr() const { return "funcDef"; }
 
     /// LLVM style RTTI
     static bool classof(const AstNode* c) { return c->getKind() == AST_funcDef; }
@@ -189,8 +194,7 @@ public:
 class StmtNode : public AstNode
 {
 public:
-    StmtNode(AstKind _kind, const Location& _loc) 
-            : AstNode(_kind, _loc) {}
+    StmtNode(AstKind _kind, const Location& _loc);
     ~StmtNode() {}
 
     std::string getSignature() const override;
@@ -212,9 +216,9 @@ public:
     bool is_const;
     AstType type;
 
-    DeclNode::DeclNode(AstKind _kind, const Location& _loc, bool _is_const, AstType _type)
+    DeclNode(AstKind _kind, const Location& _loc, bool _is_const, AstType _type)
             : StmtNode(_kind, _loc), is_const(_is_const), type(_type) {}
-    DeclNode::~DeclNode() {}
+    ~DeclNode() {}
 
     std::string getSignature() const override;
 
@@ -457,7 +461,12 @@ public:
     Immediate immediate;
     AstType type;
 
-    ExprNode(AstKind _kind, const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type);
+    bool is_var;
+    std::string variable;
+    std::vector<ExprNode*> indexExpr;
+
+    ExprNode(AstKind _kind, const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr);
     ~ExprNode();
 
     std::string getSignature() const override;
@@ -465,6 +474,8 @@ public:
     void setImmediate(Immediate _immediate);
 
     bool ready() { return is_const; }
+
+    bool cut() { return is_var; } 
 
     /// LLVM style RTTI
     static bool classof(const AstNode* c) { return c->getKind() >= AST_exp && c->getKind() <= AST_lOrExp; }
@@ -476,6 +487,7 @@ public:
     LOrExprNode* lOrExpr;
 
     CondExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                    bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr,
                     LOrExprNode* _lOrExpr);
     ~CondExprNode();
 
@@ -492,8 +504,10 @@ public:
     LOrExprNode* lOrExpr;
 
     LOrExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                    bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr,
                     LAndExprNode* _lAndExpr);
     LOrExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                    bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr,
                     LAndExprNode* _lAndExpr, LOrExprNode* _lOrExpr);
     ~LOrExprNode();
 
@@ -510,8 +524,10 @@ public:
     LAndExprNode* lAndExpr;
 
     LAndExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                    bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr,
                     EqExprNode* _eqExpr);
     LAndExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                    bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr,
                     EqExprNode* _eqExpr, LAndExprNode* _lAndExpr);
     ~LAndExprNode();
 
@@ -529,8 +545,10 @@ public:
     RelationOp op;
 
     EqExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                    bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr,
                     RelExprNode* _relExpr);
     EqExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                    bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr,
                     RelExprNode* _relExpr, EqExprNode* _eqExpr, RelationOp _op);
     ~EqExprNode();
 
@@ -548,8 +566,10 @@ public:
     RelationOp op;
 
     RelExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                    bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr,
                     AddExprNode* _addExpr);
     RelExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                    bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr,
                     AddExprNode* _addExpr, RelExprNode* _relExpr, RelationOp _op);
     ~RelExprNode();
 
@@ -567,8 +587,10 @@ public:
     BinaryOp op;
 
     AddExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                    bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr,
                     MulExprNode* _mulExpr, AddExprNode* _addExpr, BinaryOp _op);
     AddExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                    bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr,
                     MulExprNode* _mulExpr);
     ~AddExprNode();
 
@@ -586,8 +608,10 @@ public:
     BinaryOp op;
 
     MulExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                    bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr,
                     UnaryExprNode* _unaryExpr, MulExprNode* _mulExpr, BinaryOp _op);
     MulExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                    bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr,
                     UnaryExprNode* _unaryExpr);
     ~MulExprNode();
 
@@ -609,10 +633,13 @@ public:
     UnaryExprNode* unaryExpr;
 
     UnaryExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                    bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr,
                     PrimaryExprNode* _primaryExpr);
     UnaryExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                    bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr,
                     std::string _funcName, std::vector<ExprNode*> _funcParamList);
     UnaryExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                    bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr,
                     UnaryOp _op, UnaryExprNode* _unaryExpr);
     ~UnaryExprNode();
 
@@ -631,10 +658,13 @@ public:
     LvalNode* lval;
 
     PrimaryExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
-                        ExprNode* _expr);
+                    bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr,
+                    ExprNode* _expr);
     PrimaryExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
-                        LvalNode* _lval);
-    PrimaryExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type);
+                    bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr,
+                    LvalNode* _lval);
+    PrimaryExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                    bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr);
     ~PrimaryExprNode();
 
     std::string getSignature() const override;
@@ -646,11 +676,11 @@ public:
 class LvalNode : public ExprNode
 {
 public:
-    std::string variable;
-    std::vector<ExprNode*> expr;
+    // std::string variable;
+    // std::vector<ExprNode*> indexExpr;
 
     LvalNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
-                std::string _variable, std::vector<ExprNode*> _expr);
+                std::string _variable, std::vector<ExprNode*> _indexExpr);
     ~LvalNode();
 
     std::string getSignature() const override;

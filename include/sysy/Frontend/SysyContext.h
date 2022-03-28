@@ -33,8 +33,8 @@ public:
     }
 
 private: // Use for our default obj
-    SysyContext();
-    ~SysyContext();
+    SysyContext() : sourceMgr() {}
+    ~SysyContext() {}
 };
 
 }

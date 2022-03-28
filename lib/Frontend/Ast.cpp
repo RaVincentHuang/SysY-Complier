@@ -8,6 +8,71 @@ namespace ast
 // Basic
 FuncDefNode* AstNode::getParentFuction() const {}
 
+std::vector<std::string> nodeName
+{
+    "compUnit",
+    "decl",
+    "constDecl",
+    "constDef",
+    "varDecl",
+    "varDef",
+    "prototype",
+    "initVal",
+    "funcDef",
+    "funcParams",
+    "funcParam",
+    "stmt",
+    "block",
+    "assignStmt",
+    "expStmt",
+    "ifStmt",
+    "forStmt",
+    "whileStmt",
+    "breakStmt",
+    "continueStmt",
+    "returnStmt",
+    "expr",
+    "cond",
+    "lVal",
+    "primaryExpr",
+    "unaryExpr",
+    "mulExpr",
+    "addExpr",
+    "relExpr",
+    "eqExpr",
+    "lAndExpr",
+    "lOrExpr",
+    "EOF",
+    "Undefined"
+};
+
+void AstNode::printAst(int depth)
+{
+    for(int i = 1;i < depth; i++)
+        if (i == 1)
+            std::cout << "\t";
+        else
+            std::cout << "|\t";
+    
+    if(this->kind != AST_compUnit)
+        std::cout << "|--> ";
+    std::cout << "\033[36m[\033[m" << nodeName.at(kind) << "\033[36m]\033[m";
+    if(kind >= AST_exp && kind <= AST_lOrExp && ((ExprNode*)this)->ready())
+        std::cout << "\033[32m<\033[m" << ((ExprNode*)this)->immediate.Integer << "\033[32m>\033[m";
+    else if(kind == AST_funcDef)
+        std::cout << "\033[32m<\033[m" << ((FuncDefNode*)this)->funcName << "\033[32m>\033[m";
+    else if(kind == AST_funcParam)
+        std::cout << "\033[32m<\033[m" << ((FuncParamNode*)this)->varName << "\033[32m>\033[m";
+    else if(kind == AST_unaryExp)
+        std::cout << "\033[32m<\033[m" << ((UnaryExprNode*)this)->funcName << "\033[32m>\033[m";
+    else if(kind == AST_lVal)
+        std::cout << "\033[32m<\033[m" << ((LvalNode*)this)->variable << "\033[32m>\033[m";
+    std::cout << std::endl;
+    
+    for(auto child : children)
+        child->printAst(depth + 1);
+}
+
 // CompUnitNode
 CompUnitNode::CompUnitNode(const Location& _loc, std::vector<FuncDefNode*> _funcDef, 
                             std::vector<DeclNode*> _decl) 
@@ -136,6 +201,12 @@ InitValNode::~InitValNode() {}
 
 std::string InitValNode::getSignature() const {}
 
+// StmtNode
+StmtNode::StmtNode(AstKind _kind, const Location& _loc)
+    : AstNode(_kind, _loc) {}
+
+std::string StmtNode::getSignature() const {}
+
 // AssignStmtNode
 AssignStmtNode::AssignStmtNode(const Location& _loc, LvalNode* _lval, ExprNode* _expr) 
     : StmtNode(AST_assignStmt, _loc), lval(_lval), expr(_expr)
@@ -252,8 +323,13 @@ std::string BlockNode::getSignature() const {}
 
 // ExprNode
 ExprNode::ExprNode(AstKind _kind, const Location& _loc, bool _is_const,
-                    Immediate _immediate, AstType _type)
-    : is_const(_is_const), immediate(_immediate), type(_type) {}
+                    Immediate _immediate, AstType _type, 
+                    bool _is_var, std::string _variable,  std::vector<ExprNode*> _indexExpr)
+    : AstNode(_kind, _loc), is_const(_is_const), immediate(_immediate), type(_type),
+    is_var(_is_var), variable(_variable), indexExpr(std::move(_indexExpr))
+{
+    SET_IT_PARENT_VEC(indexExpr);
+}
 
 ExprNode::~ExprNode() {}
 
@@ -267,8 +343,9 @@ void ExprNode::setImmediate(Immediate _immediate)
 
 // CondExprNode
 CondExprNode::CondExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                            bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr, 
                             LOrExprNode* _lOrExpr)
-    : ExprNode(AST_addExp, _loc, _is_const, _immediate, _type), lOrExpr(_lOrExpr)
+    : ExprNode(AST_cond, _loc, _is_const, _immediate, _type, _is_var, _variable, std::move(_indexExpr)), lOrExpr(_lOrExpr)
 {
     SET_IT_PARENT(lOrExpr);
 }
@@ -279,15 +356,17 @@ std::string CondExprNode::getSignature() const {}
 
 // LOrExprNode
 LOrExprNode::LOrExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                            bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr,
                             LAndExprNode* _lAndExpr)
-    : ExprNode(AST_addExp, _loc, _is_const, _immediate, _type), lAndExpr(_lAndExpr), lOrExpr(nullptr)
+    : ExprNode(AST_lOrExp, _loc, _is_const, _immediate, _type, _is_var, _variable, std::move(_indexExpr)), lAndExpr(_lAndExpr), lOrExpr(nullptr)
 {
     SET_IT_PARENT(lAndExpr);
 }
 
 LOrExprNode::LOrExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                            bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr,
                             LAndExprNode* _lAndExpr, LOrExprNode* _lOrExpr)
-    : ExprNode(AST_addExp, _loc, _is_const, _immediate, _type), lAndExpr(_lAndExpr), lOrExpr(_lOrExpr)
+    : ExprNode(AST_lOrExp, _loc, _is_const, _immediate, _type, _is_var, _variable, std::move(_indexExpr)), lAndExpr(_lAndExpr), lOrExpr(_lOrExpr)
 {
     SET_IT_PARENT(lAndExpr);
     SET_IT_PARENT(lOrExpr);
@@ -299,15 +378,17 @@ std::string LOrExprNode::getSignature() const {}
 
 // LAndExprNode
 LAndExprNode::LAndExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                            bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr,
                             EqExprNode* _eqExpr)
-    : ExprNode(AST_addExp, _loc, _is_const, _immediate, _type), eqExpr(_eqExpr), lAndExpr(nullptr)
+    : ExprNode(AST_lAndExp, _loc, _is_const, _immediate, _type, _is_var, _variable, std::move(_indexExpr)), eqExpr(_eqExpr), lAndExpr(nullptr)
 {
     SET_IT_PARENT(eqExpr);
 }
 
 LAndExprNode::LAndExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                            bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr,
                             EqExprNode* _eqExpr, LAndExprNode* _lAndExpr)
-    : ExprNode(AST_addExp, _loc, _is_const, _immediate, _type), eqExpr(_eqExpr), lAndExpr(_lAndExpr)
+    : ExprNode(AST_lAndExp, _loc, _is_const, _immediate, _type, _is_var, _variable, std::move(_indexExpr)), eqExpr(_eqExpr), lAndExpr(_lAndExpr)
 {
     SET_IT_PARENT(eqExpr);
     SET_IT_PARENT(lAndExpr);
@@ -319,15 +400,17 @@ std::string LAndExprNode::getSignature() const {}
 
 // EqExprNode
 EqExprNode::EqExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                        bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr,
                         RelExprNode* _relExpr)
-    : ExprNode(AST_addExp, _loc, _is_const, _immediate, _type), relExpr(_relExpr), eqExpr(nullptr), op(NONE)
+    : ExprNode(AST_eqExp, _loc, _is_const, _immediate, _type, _is_var, _variable, std::move(_indexExpr)), relExpr(_relExpr), eqExpr(nullptr), op(ROP_NONE)
 {
     SET_IT_PARENT(relExpr);
 }
 
 EqExprNode::EqExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                        bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr,
                         RelExprNode* _relExpr, EqExprNode* _eqExpr, RelationOp _op)
-    : ExprNode(AST_addExp, _loc, _is_const, _immediate, _type), relExpr(_relExpr), eqExpr(_eqExpr), op(_op) 
+    : ExprNode(AST_eqExp, _loc, _is_const, _immediate, _type, _is_var, _variable, std::move(_indexExpr)), relExpr(_relExpr), eqExpr(_eqExpr), op(_op) 
 {
     SET_IT_PARENT(relExpr);
     SET_IT_PARENT(eqExpr);
@@ -339,15 +422,17 @@ std::string EqExprNode::getSignature() const {}
 
 // RelExprNode
 RelExprNode::RelExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                            bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr,
                             AddExprNode* _addExpr)
-    : ExprNode(AST_addExp, _loc, _is_const, _immediate, _type), addExpr(_addExpr), relExpr(nullptr), op(NONE)
+    : ExprNode(AST_relExp, _loc, _is_const, _immediate, _type, _is_var, _variable, std::move(_indexExpr)), addExpr(_addExpr), relExpr(nullptr), op(ROP_NONE)
 {
     SET_IT_PARENT(addExpr);
 }
 
 RelExprNode::RelExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                            bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr,
                             AddExprNode* _addExpr, RelExprNode* _relExpr, RelationOp _op)
-    : ExprNode(AST_addExp, _loc, _is_const, _immediate, _type), addExpr(_addExpr), relExpr(_relExpr), op(_op)
+    : ExprNode(AST_relExp, _loc, _is_const, _immediate, _type, _is_var, _variable, std::move(_indexExpr)), addExpr(_addExpr), relExpr(_relExpr), op(_op)
 {
     SET_IT_PARENT(addExpr);
     SET_IT_PARENT(relExpr);
@@ -359,16 +444,18 @@ std::string RelExprNode::getSignature() const {}
 
 // AddExprNode
 AddExprNode::AddExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                            bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr,
                             MulExprNode* _mulExpr, AddExprNode* _addExpr, BinaryOp _op)
-    : ExprNode(AST_addExp, _loc, _is_const, _immediate, _type), mulExpr(_mulExpr), addExpr(_addExpr), op(_op)
+    : ExprNode(AST_addExp, _loc, _is_const, _immediate, _type, _is_var, _variable, std::move(_indexExpr)), mulExpr(_mulExpr), addExpr(_addExpr), op(_op)
 {
     SET_IT_PARENT(mulExpr);
     SET_IT_PARENT(addExpr);
 }
 
 AddExprNode::AddExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                            bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr,
                             MulExprNode* _mulExpr)
-    : ExprNode(AST_addExp, _loc, _is_const, _immediate, _type), mulExpr(_mulExpr), addExpr(nullptr), op(BinaryOp::NONE)
+    : ExprNode(AST_addExp, _loc, _is_const, _immediate, _type, _is_var, _variable, std::move(_indexExpr)), mulExpr(_mulExpr), addExpr(nullptr), op(BOP_NONE)
 {
     SET_IT_PARENT(mulExpr);
 }
@@ -379,16 +466,18 @@ std::string AddExprNode::getSignature() const {}
 
 // MulExprNode
 MulExprNode::MulExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                            bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr,
                             UnaryExprNode* _unaryExpr, MulExprNode* _mulExpr, BinaryOp _op)
-    : ExprNode(AST_addExp, _loc, _is_const, _immediate, _type), unaryExpr(_unaryExpr), mulExpr(_mulExpr), op(op)
+    : ExprNode(AST_mulExp, _loc, _is_const, _immediate, _type, _is_var, _variable, std::move(_indexExpr)), unaryExpr(_unaryExpr), mulExpr(_mulExpr), op(op)
 {
     SET_IT_PARENT(unaryExpr);
     SET_IT_PARENT(mulExpr);
 }
 
 MulExprNode::MulExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                            bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr,
                             UnaryExprNode* _unaryExpr)
-    : ExprNode(AST_addExp, _loc, _is_const, _immediate, _type), unaryExpr(_unaryExpr), mulExpr(nullptr), op(BinaryOp::NONE)
+    : ExprNode(AST_mulExp, _loc, _is_const, _immediate, _type, _is_var, _variable, std::move(_indexExpr)), unaryExpr(_unaryExpr), mulExpr(nullptr), op(BOP_NONE)
 {
     SET_IT_PARENT(unaryExpr);
 }
@@ -399,26 +488,29 @@ std::string MulExprNode::getSignature() const {}
 
 // UnaryExprNode
 UnaryExprNode::UnaryExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                                bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr,
                                 PrimaryExprNode* _primaryExpr)
-    : ExprNode(AST_addExp, _loc, _is_const, _immediate, _type), primaryExpr(_primaryExpr),
+    : ExprNode(AST_unaryExp, _loc, _is_const, _immediate, _type, _is_var, _variable, std::move(_indexExpr)), primaryExpr(_primaryExpr),
     funcName(), funcParamList(),
-    op(UnaryOp::NONE), unaryExpr(nullptr)
+    op(UOP_NONE), unaryExpr(nullptr)
 {
     SET_IT_PARENT(primaryExpr);
 }
 
 UnaryExprNode::UnaryExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                                bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr,
                                 std::string _funcName, std::vector<ExprNode*> _funcParamList)
-    : ExprNode(AST_addExp, _loc, _is_const, _immediate, _type), primaryExpr(nullptr),
+    : ExprNode(AST_unaryExp, _loc, _is_const, _immediate, _type, _is_var, _variable, std::move(_indexExpr)), primaryExpr(nullptr),
     funcName(_funcName), funcParamList(std::move(_funcParamList)),
-    op(UnaryOp::NONE), unaryExpr(nullptr)
+    op(UOP_NONE), unaryExpr(nullptr)
 {
     SET_IT_PARENT_VEC(funcParamList);
 }
 
 UnaryExprNode::UnaryExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                                bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr,
                                 UnaryOp _op, UnaryExprNode* _unaryExpr)
-    : ExprNode(AST_addExp, _loc, _is_const, _immediate, _type), primaryExpr(nullptr),
+    : ExprNode(AST_unaryExp, _loc, _is_const, _immediate, _type, _is_var, _variable, std::move(_indexExpr)), primaryExpr(nullptr),
     funcName(), funcParamList(),
     op(_op), unaryExpr(_unaryExpr)
 {
@@ -431,27 +523,40 @@ std::string UnaryExprNode::getSignature() const {}
 
 // PrimaryExprNode
 PrimaryExprNode::PrimaryExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                                    bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr,
                                     ExprNode* _expr)
-    : ExprNode(AST_addExp, _loc, _is_const, _immediate, _type), expr(_expr),
+    : ExprNode(AST_primaryExp, _loc, _is_const, _immediate, _type, _is_var, _variable, std::move(_indexExpr)), expr(_expr),
     lval(nullptr)
 {
     SET_IT_PARENT(expr);
 }
 PrimaryExprNode::PrimaryExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                                    bool _is_var, std::string _variable, std::vector<ExprNode*> _indexExpr,
                                     LvalNode* _lval)
-    : ExprNode(AST_addExp, _loc, _is_const, _immediate, _type), 
+    : ExprNode(AST_primaryExp, _loc, _is_const, _immediate, _type, _is_var, _variable, std::move(_indexExpr)), 
     expr(nullptr), lval(_lval)
 {
     SET_IT_PARENT(lval);
 }
 
-PrimaryExprNode::PrimaryExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type)
-    : ExprNode(AST_addExp, _loc, _is_const, _immediate, _type),
+PrimaryExprNode::PrimaryExprNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                                    bool _is_var, std::string _variable,  std::vector<ExprNode*> _indexExpr)
+    : ExprNode(AST_primaryExp, _loc, _is_const, _immediate, _type, _is_var, _variable, std::move(_indexExpr)),
     expr(nullptr), lval(nullptr) {}
 
 PrimaryExprNode::~PrimaryExprNode() {}
 
 std::string PrimaryExprNode::getSignature() const {}
+
+
+// LvalNode
+LvalNode::LvalNode(const Location& _loc, bool _is_const,  Immediate _immediate, AstType _type,
+                    std::string _variable,  std::vector<ExprNode*> _indexExpr)
+    : ExprNode(AST_lVal, _loc, _is_const, _immediate, _type, true, _variable, std::move(_indexExpr)) {}
+
+LvalNode::~LvalNode() {}
+
+std::string LvalNode::getSignature() const {}
 
 }
 }

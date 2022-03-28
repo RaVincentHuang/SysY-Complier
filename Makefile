@@ -5,7 +5,8 @@ vpath %.cpp lib/Frontend:.
 SYSYC = sysyc
 SYSYC_OBJ = sysyc.o
 
-FRONTEND_OBJ = SysYParser.o SysYLexer.o SysYParserVisitor.o SysYParserBaseVisitor.o Frontend.o AST.o SysYVisitor.o
+FRONTEND_OBJ = SysYParser.o SysYLexer.o SysYParserVisitor.o SysYParserBaseVisitor.o \
+				Frontend.o Ast.o SysYVisitor.o Location.o SysyContext.o 
 
 default : $(SYSYC)
 

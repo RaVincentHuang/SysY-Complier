@@ -41,6 +41,7 @@ void SysYVisitor::printCst(antlr4::ParserRuleContext *ctx, int depth)
     size_t num = ctx->getRuleIndex();
     if(ctx->getRuleIndex() != SysYParser::RuleCompUnit)
         std::cout << "|--> ";
+    
     std::cout << "\033[36m[\033[m" << parser.getRuleNames().at(num) << "\033[36m]\033[m" << std::endl;
     for(auto child : ctx->children)
         printCst((antlr4::ParserRuleContext *)child, depth + 1);
@@ -243,9 +244,11 @@ antlrcpp::Any SysYVisitor::visitFuncDef(SysYParser::FuncDefContext *ctx)
     
     std::string _funcName = ctx->Ident()->toString();
 
-    auto funcFParams = ctx->funcFParams();
-    FuncParamListNode* _funcParamList = unpackAny<FuncParamListNode*>(visitFuncFParams(funcFParams));
-
+    FuncParamListNode* _funcParamList;
+    if(auto funcFParams = ctx->funcFParams())
+        _funcParamList = unpackAny<FuncParamListNode*>(visitFuncFParams(funcFParams));
+    else
+        _funcParamList = nullptr;
     auto block  = ctx->block(); 
     BlockNode* _block = unpackAny<BlockNode*>(visitBlock(block));
 
@@ -376,8 +379,14 @@ antlrcpp::Any SysYVisitor::visitStmt(SysYParser::StmtContext *ctx)
         auto thenBlock = ctx->stmt().at(0);
         StmtNode* _thenBlock = unpackAny<StmtNode*>(visitStmt(thenBlock));
 
-        auto elseBlock = ctx->stmt().at(1);
-        StmtNode* _elseBlock = unpackAny<StmtNode*>(visitStmt(elseBlock));
+        StmtNode* _elseBlock;
+        if(ctx->stmt().size() == 2)
+        {
+            auto elseBlock = ctx->stmt().at(1);
+            _elseBlock = unpackAny<StmtNode*>(visitStmt(elseBlock));
+        }
+        else
+            _elseBlock = nullptr;
 
         IfStmtNode* ret = new IfStmtNode(_loc, _cond, _thenBlock, _elseBlock);
         return (StmtNode*) ret;
@@ -440,8 +449,8 @@ antlrcpp::Any SysYVisitor::visitStmt(SysYParser::StmtContext *ctx)
 antlrcpp::Any SysYVisitor::visitExp(SysYParser::ExpContext *ctx)
 {
     auto addExp = ctx->addExp();
-    auto ptr = unpackAny<ExprNode*>(visitAddExp(addExp));
-    return ptr;
+    auto ptr = unpackAny<AddExprNode*>(visitAddExp(addExp));
+    return (ExprNode*) ptr;
 }
   
 antlrcpp::Any SysYVisitor::visitCond(SysYParser::CondContext *ctx)
@@ -455,11 +464,11 @@ antlrcpp::Any SysYVisitor::visitCond(SysYParser::CondContext *ctx)
         Immediate _immediate = _lOrExpr->immediate;
         AstType _type = _lOrExpr->type;
 
-        CondExprNode* ret = new CondExprNode(_loc, true, _immediate, _type, nullptr);
+        CondExprNode* ret = new CondExprNode(_loc, true, _immediate, _type, false, "", {}, nullptr);
         return ret;
     }
 
-    CondExprNode* ret = new CondExprNode(_loc, true, 0, UNKNOW, _lOrExpr);
+    CondExprNode* ret = new CondExprNode(_loc, true, 0, UNKNOW, false, "", {}, _lOrExpr);
     return ret;
 }
   
@@ -488,18 +497,18 @@ antlrcpp::Any SysYVisitor::visitPrimaryExp(SysYParser::PrimaryExpContext *ctx)
             Immediate _immediate = _expr->immediate;
             AstType _type = _expr->type;
 
-            PrimaryExprNode* ret = new PrimaryExprNode(_loc, true, _immediate, _type, (ExprNode*) nullptr);
+            PrimaryExprNode* ret = new PrimaryExprNode(_loc, true, _immediate, _type, false, "", {}, (ExprNode*) nullptr);
             return ret;
         }
 
-        PrimaryExprNode* ret = new PrimaryExprNode(_loc, true, 0, UNKNOW, _expr);
+        PrimaryExprNode* ret = new PrimaryExprNode(_loc, true, 0, UNKNOW, false, "", {}, _expr);
         return ret;
     }
     else if(auto lval = ctx->lVal())
     {
         LvalNode* _lval = unpackAny<LvalNode*>(visitLVal(lval));
 
-        PrimaryExprNode* ret = new PrimaryExprNode(_loc, false, 0, UNKNOW, _lval);
+        PrimaryExprNode* ret = new PrimaryExprNode(_loc, false, 0, UNKNOW, false, "", {}, _lval);
         return ret;
     }
     else
@@ -514,7 +523,8 @@ antlrcpp::Any SysYVisitor::visitPrimaryExp(SysYParser::PrimaryExpContext *ctx)
         
         AstType _type = INT;
 
-        PrimaryExprNode* ret = new PrimaryExprNode(_loc, true, _immediate, _type);
+        PrimaryExprNode* ret = new PrimaryExprNode(_loc, true, _immediate, _type, false, "", {});
+        return ret;
     }
 }
   
@@ -533,11 +543,11 @@ antlrcpp::Any SysYVisitor::visitUnaryExp(SysYParser::UnaryExpContext *ctx)
             Immediate _immediate = _primaryExpr->immediate;
             AstType _type = _primaryExpr->type;
 
-            UnaryExprNode* ret = new UnaryExprNode(_loc, true, _immediate, _type, nullptr);
+            UnaryExprNode* ret = new UnaryExprNode(_loc, true, _immediate, _type, false, "", {}, nullptr);
             return ret;
         }
 
-        UnaryExprNode* ret = new UnaryExprNode(_loc, false, 0, UNKNOW, _primaryExpr);
+        UnaryExprNode* ret = new UnaryExprNode(_loc, false, 0, UNKNOW, false, "", {}, _primaryExpr);
         return ret;
     }
     else if(ctx->Ident())
@@ -548,7 +558,7 @@ antlrcpp::Any SysYVisitor::visitUnaryExp(SysYParser::UnaryExpContext *ctx)
             for(auto exp : funcRParams->exp())
                 _funcParamList.push_back(unpackAny<ExprNode*>(visitExp(exp)));
         
-        UnaryExprNode* ret = new UnaryExprNode(_loc, false, 0, UNKNOW, _funcName, _funcParamList);
+        UnaryExprNode* ret = new UnaryExprNode(_loc, false, 0, UNKNOW, false, "", {}, _funcName, _funcParamList);
         return ret;
     }
     else
@@ -569,18 +579,18 @@ antlrcpp::Any SysYVisitor::visitUnaryExp(SysYParser::UnaryExpContext *ctx)
             
             AstType _type = _unaryExpr->type;
 
-            UnaryExprNode* ret = new UnaryExprNode(_loc, true, _immediate, _type, UnaryOp::NONE, nullptr);
+            UnaryExprNode* ret = new UnaryExprNode(_loc, true, _immediate, _type, false, "", {}, UOP_NONE, nullptr);
             return ret;
         }
         UnaryOp _op;
         if(ctx->unaryOp()->ADD())
-            _op = UnaryOp::ADD;
+            _op = UOP_ADD;
         else if(ctx->unaryOp()->SUB())
-            _op = UnaryOp::SUB;
+            _op = UOP_SUB;
         else
-            _op = UnaryOp::NOT;
+            _op = UOP_NOT;
 
-        UnaryExprNode* ret = new UnaryExprNode(_loc, false, 0, UNKNOW, _op, _unaryExpr);
+        UnaryExprNode* ret = new UnaryExprNode(_loc, false, 0, UNKNOW, false, "", {}, _op, _unaryExpr);
         return ret;
     }
 }
@@ -613,17 +623,17 @@ antlrcpp::Any SysYVisitor::visitMulExp(SysYParser::MulExpContext *ctx)
             
             AstType _type = _unaryExpr->type;
 
-            MulExprNode* ret = new MulExprNode(_loc, true, _immediate, _type, nullptr, nullptr, BinaryOp::NONE);
+            MulExprNode* ret = new MulExprNode(_loc, true, _immediate, _type, false, "", {}, nullptr, nullptr, BOP_NONE);
             return ret;
         }
 
         MulExprNode* ret;
         if(ctx->MUL())
-            ret = new MulExprNode(_loc, false, 0, UNKNOW, _unaryExpr, _mulExpr, MUL);
+            ret = new MulExprNode(_loc, false, 0, UNKNOW, false, "", {}, _unaryExpr, _mulExpr, BOP_MUL);
         else if(ctx->DIV())
-            ret = new MulExprNode(_loc, false, 0, UNKNOW, _unaryExpr, _mulExpr, DIV);
+            ret = new MulExprNode(_loc, false, 0, UNKNOW, false, "", {}, _unaryExpr, _mulExpr, BOP_DIV);
         else
-            ret = new MulExprNode(_loc, false, 0, UNKNOW, _unaryExpr, _mulExpr, MOD);
+            ret = new MulExprNode(_loc, false, 0, UNKNOW, false, "", {}, _unaryExpr, _mulExpr, BOP_MOD);
         
         return ret;
     }
@@ -636,11 +646,11 @@ antlrcpp::Any SysYVisitor::visitMulExp(SysYParser::MulExpContext *ctx)
         Immediate _immediate = _unaryExpr->immediate;
         AstType _type = _unaryExpr->type;
 
-        MulExprNode* ret = new MulExprNode(_loc, true, _immediate, _type, nullptr);
+        MulExprNode* ret = new MulExprNode(_loc, true, _immediate, _type, false, "", {}, nullptr);
         return ret;
     }
 
-    MulExprNode* ret = new MulExprNode(_loc, false, 0, UNKNOW, _unaryExpr);
+    MulExprNode* ret = new MulExprNode(_loc, false, 0, UNKNOW, false, "", {}, _unaryExpr);
     return ret;
 
 }
@@ -667,14 +677,14 @@ antlrcpp::Any SysYVisitor::visitAddExp(SysYParser::AddExpContext *ctx)
             
             AstType _type = _mulExpr->type;
 
-            AddExprNode* ret = new AddExprNode(_loc, true, _immediate, _type, nullptr, nullptr, BinaryOp::NONE);
+            AddExprNode* ret = new AddExprNode(_loc, true, _immediate, _type, false, "", {}, nullptr, nullptr, BOP_NONE);
             return ret;
         }
         AddExprNode* ret;
         if(ctx->ADD())
-            ret = new AddExprNode(_loc, false, 0, UNKNOW, _mulExpr, _addExpr, BinaryOp::ADD);
+            ret = new AddExprNode(_loc, false, 0, UNKNOW, false, "", {}, _mulExpr, _addExpr, BOP_ADD);
         else
-            ret = new AddExprNode(_loc, false, 0, UNKNOW, _mulExpr, _addExpr, BinaryOp::SUB);
+            ret = new AddExprNode(_loc, false, 0, UNKNOW, false, "", {}, _mulExpr, _addExpr, BOP_SUB);
         return ret;
     }
     auto mulExp = ctx->mulExp();
@@ -685,11 +695,11 @@ antlrcpp::Any SysYVisitor::visitAddExp(SysYParser::AddExpContext *ctx)
         Immediate _immediate = _mulExpr->immediate;
         AstType _type = _mulExpr->type;
 
-        AddExprNode* ret = new AddExprNode(_loc, true, _immediate, _type, nullptr);
+        AddExprNode* ret = new AddExprNode(_loc, true, _immediate, _type, false, "", {}, nullptr);
         return ret;
     }
 
-    AddExprNode* ret = new AddExprNode(_loc, false, 0, UNKNOW, _mulExpr);
+    AddExprNode* ret = new AddExprNode(_loc, false, 0, UNKNOW, false, "", {}, _mulExpr);
     return ret;
 }
   
@@ -719,19 +729,19 @@ antlrcpp::Any SysYVisitor::visitRelExp(SysYParser::RelExpContext *ctx)
             
             AstType _type = _addExpr->type;
 
-            RelExprNode* ret = new RelExprNode(_loc, true, _immdiate, _type, nullptr, nullptr, RelationOp::NONE);
+            RelExprNode* ret = new RelExprNode(_loc, true, _immdiate, _type, false, "", {}, nullptr, nullptr, ROP_NONE);
             return ret;
         }
 
         RelExprNode* ret;
         if(ctx->LES())
-            ret = new RelExprNode(_loc, false, 0, UNKNOW, _addExpr, _relExpr, LES);
+            ret = new RelExprNode(_loc, false, 0, UNKNOW, false, "", {}, _addExpr, _relExpr, ROP_LES);
         else if(ctx->GRT())
-            ret = new RelExprNode(_loc, false, 0, UNKNOW, _addExpr, _relExpr, GRT);
+            ret = new RelExprNode(_loc, false, 0, UNKNOW, false, "", {}, _addExpr, _relExpr, ROP_GRT);
         else if(ctx->LEQ())
-            ret = new RelExprNode(_loc, false, 0, UNKNOW, _addExpr, _relExpr, LEQ);
+            ret = new RelExprNode(_loc, false, 0, UNKNOW, false, "", {}, _addExpr, _relExpr, ROP_LEQ);
         else
-            ret = new RelExprNode(_loc, false, 0, UNKNOW, _addExpr, _relExpr, GEQ);
+            ret = new RelExprNode(_loc, false, 0, UNKNOW, false, "", {}, _addExpr, _relExpr, ROP_GEQ);
         
         return ret;
     }
@@ -743,11 +753,11 @@ antlrcpp::Any SysYVisitor::visitRelExp(SysYParser::RelExpContext *ctx)
         Immediate _immediate = _addExpr->immediate;
         AstType _type = _addExpr->type;
 
-        RelExprNode* ret = new RelExprNode(_loc, true, _immediate, _type, nullptr);
+        RelExprNode* ret = new RelExprNode(_loc, true, _immediate, _type, false, "", {}, nullptr);
         return ret;
     }
     
-    RelExprNode* ret = new RelExprNode(_loc, false, 0, UNKNOW, _addExpr);
+    RelExprNode* ret = new RelExprNode(_loc, false, 0, UNKNOW, false, "", {}, _addExpr);
     return ret;
 }
   
@@ -773,15 +783,15 @@ antlrcpp::Any SysYVisitor::visitEqExp(SysYParser::EqExpContext *ctx)
             else
                 _immdiate.Integer = _relExpr->immediate.Integer != _eqExpr->immediate.Integer;
 
-            EqExprNode* ret = new EqExprNode(_loc, true, _immdiate, _type, nullptr, nullptr, RelationOp::NONE);
+            EqExprNode* ret = new EqExprNode(_loc, true, _immdiate, _type, false, "", {}, nullptr, nullptr, ROP_NONE);
             return ret;
         }
 
         EqExprNode* ret;
         if(ctx->EQL())
-            ret = new EqExprNode(_loc, false, 0, UNKNOW, _relExpr, _eqExpr, EQL);
+            ret = new EqExprNode(_loc, false, 0, UNKNOW, false, "", {}, _relExpr, _eqExpr, ROP_EQL);
         else
-            ret = new EqExprNode(_loc, false, 0, UNKNOW, _relExpr, _eqExpr, NEQ);
+            ret = new EqExprNode(_loc, false, 0, UNKNOW, false, "", {}, _relExpr, _eqExpr, ROP_NEQ);
         return ret;
     }
 
@@ -793,10 +803,10 @@ antlrcpp::Any SysYVisitor::visitEqExp(SysYParser::EqExpContext *ctx)
         Immediate _immediate = _relExpr->immediate;
         AstType _type = _relExpr->type;
 
-        EqExprNode* ret = new EqExprNode(_loc, true, _immediate, _type, nullptr);
+        EqExprNode* ret = new EqExprNode(_loc, true, _immediate, _type, false, "", {}, nullptr);
         return ret;
     }
-    EqExprNode* ret = new EqExprNode(_loc, false, 0, UNKNOW, _relExpr);
+    EqExprNode* ret = new EqExprNode(_loc, false, 0, UNKNOW, false, "", {}, _relExpr);
     return ret;
 }
   
@@ -818,11 +828,11 @@ antlrcpp::Any SysYVisitor::visitLAndExp(SysYParser::LAndExpContext *ctx)
             _immdiate.Integer = _eqExpr->immediate.Integer && _lAndExpr->immediate.Integer;
 
             AstType _type = _eqExpr->type;
-            LAndExprNode* ret = new LAndExprNode(_loc, true, _immdiate, _type, nullptr, nullptr);
+            LAndExprNode* ret = new LAndExprNode(_loc, true, _immdiate, _type, false, "", {}, nullptr, nullptr);
             return ret;
         }
 
-        LAndExprNode* ret = new LAndExprNode(_loc, false, 0, UNKNOW, _eqExpr, _lAndExpr);
+        LAndExprNode* ret = new LAndExprNode(_loc, false, 0, UNKNOW, false, "", {}, _eqExpr, _lAndExpr);
         return ret;
     }
 
@@ -834,11 +844,11 @@ antlrcpp::Any SysYVisitor::visitLAndExp(SysYParser::LAndExpContext *ctx)
         Immediate _immediate = _eqExpr->immediate;
         AstType _type = _eqExpr->type;
 
-        LAndExprNode* ret = new LAndExprNode(_loc, true, _immediate, _type, nullptr);
+        LAndExprNode* ret = new LAndExprNode(_loc, true, _immediate, _type, false, "", {}, nullptr);
         return ret;
     }
 
-    LAndExprNode* ret = new LAndExprNode(_loc, false, 0, UNKNOW, _eqExpr);
+    LAndExprNode* ret = new LAndExprNode(_loc, false, 0, UNKNOW, false, "", {}, _eqExpr);
     return ret;
 }
   
@@ -860,10 +870,10 @@ antlrcpp::Any SysYVisitor::visitLOrExp(SysYParser::LOrExpContext *ctx)
             _immdiate.Integer = _lAndExpr->immediate.Integer || _lOrExpr->immediate.Integer;
 
             AstType _type = _lAndExpr->type;
-            LOrExprNode* ret = new LOrExprNode(_loc, true, _immdiate, _type, nullptr, nullptr);
+            LOrExprNode* ret = new LOrExprNode(_loc, true, _immdiate, _type, false, "", {}, nullptr, nullptr);
             return ret;
         }
-        LOrExprNode* ret = new LOrExprNode(_loc, false, 0, UNKNOW, _lAndExpr, _lOrExpr);
+        LOrExprNode* ret = new LOrExprNode(_loc, false, 0, UNKNOW, false, "", {}, _lAndExpr, _lOrExpr);
         return ret;
     }
     auto lAndExp = ctx->lAndExp();
@@ -874,10 +884,10 @@ antlrcpp::Any SysYVisitor::visitLOrExp(SysYParser::LOrExpContext *ctx)
         Immediate _immdiate = _lAndExpr->immediate;
         AstType _type = _lAndExpr->type;
 
-        LOrExprNode* ret = new LOrExprNode(_loc, true, _immdiate, _type, nullptr);
+        LOrExprNode* ret = new LOrExprNode(_loc, true, _immdiate, _type, false, "", {}, nullptr);
         return ret;
     }
-    LOrExprNode* ret = new LOrExprNode(_loc, false, 0, UNKNOW, _lAndExpr);
+    LOrExprNode* ret = new LOrExprNode(_loc, false, 0, UNKNOW, false, "", {}, _lAndExpr);
     return ret;
 }
   

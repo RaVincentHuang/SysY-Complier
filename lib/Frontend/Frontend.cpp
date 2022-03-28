@@ -1,12 +1,13 @@
 #include "antlr4-runtime/ANTLRInputStream.h"
 #include "antlr4-runtime/ANTLRInputStream.h"
 #include "antlr4-runtime/tree/ParseTreeWalker.h"
+#include "llvm/Support/SMLoc.h"
 #include "sysy/Frontend/Frontend.h"
 #include "sysy/Frontend/SysYVisitor.h"
 #include "sysy/Frontend/SysyContext.h"
 #include "sysy/Support/debug.h"
 #include "sysy/Support/common.h"
-#include "llvm/Support/SMLoc.h"
+#include "sysy/Frontend/Ast.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -34,8 +35,15 @@ int FrontendMain(const std::string& filename, const std::string& Gen)
         visitor.printCst(parser.compUnit(), 1);
     else if(Gen == "src")
         visitor.printSrc(parser.compUnit());
+    else if(Gen == "ast")
+    {
+        auto ast = visitor.visitCompUnit(parser.compUnit()).as<ast::CompUnitNode*>();
+        ast->printAst(1);
+    }
     else
+    {
         TODO();
+    }
     return 0;
 }
 
