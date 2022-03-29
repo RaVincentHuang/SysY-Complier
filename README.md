@@ -1,37 +1,74 @@
 # SysY-Compiler
 
-#### 介绍
+## 介绍 
 SysY语言编译器
 
-#### 软件架构
-软件架构说明
+## 软件架构
+本编译器采用了前端ANTLR+后端MLIR的总体架构，当前完成了前端到AST的生成，具体文件结构如下。
 
+```shell
+sys-y-compiler
+├── LICENSE
+├── Makefile
+├── README.en.md
+├── README.md
+├── build
+├── doc
+│   ├── SysY语言定义.pdf
+│   └── SysY运行时库.pdf
+├── include
+│   └── sysy
+│       ├── Frontend
+│       │   ├── Ast.h
+│       │   ├── AstTramsform.h
+│       │   ├── AstType.h
+│       │   ├── Frontend.h
+│       │   ├── Location.h
+│       │   ├── SysYLexer.h
+│       │   ├── SysYOp.h
+│       │   ├── SysYParser.h
+│       │   ├── SysYParserBaseVisitor.h
+│       │   ├── SysYParserVisitor.h
+│       │   ├── SysYVisitor.h
+│       │   └── SysyContext.h
+│       └── Support
+│           ├── CommandLine.h
+│           ├── common.h
+│           └── debug.h
+├── lib
+│   └── Frontend
+│       ├── Ast.cpp
+│       ├── AstTramsform.cpp
+│       ├── Frontend.cpp
+│       ├── Location.cpp
+│       ├── SysYLexer.cpp
+│       ├── SysYLexer.g4
+│       ├── SysYParser.cpp
+│       ├── SysYParser.g4
+│       ├── SysYParserBaseVisitor.cpp
+│       ├── SysYParserVisitor.cpp
+│       ├── SysYVisitor.cpp
+│       └── SysyContext.cpp
+├── scripts
+│   └── config.mk
+├── sysyc
+├── sysyc.cpp
+└── test.sy
+```
 
-#### 安装教程
+## 安装说明
+可以使用发行版
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+## 软件使用
+```shell
+sysyc <filename> [opt, ..]
 
-#### 使用说明
+# 打印源代码
+sysyc <filename> --gen=src
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+# 打印CST
+sysyc <filename> --gen=cst
 
-#### 参与贡献
-
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
-
-
-#### 特技
-
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+# 打印AST
+sysyc <filename> --gen=ast
+```

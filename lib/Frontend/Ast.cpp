@@ -55,7 +55,7 @@ void AstNode::printAst(int depth)
             std::cout << "|\t";
     
     if(this->kind != AST_compUnit)
-        std::cout << "|--> ";
+        std::cout << "├-> ";
     std::cout << "\033[36m[\033[m" << nodeName.at(kind) << "\033[36m]\033[m";
     if(kind >= AST_exp && kind <= AST_lOrExp && ((ExprNode*)this)->ready())
         std::cout << "\033[32m<\033[m" << ((ExprNode*)this)->immediate.Integer << "\033[32m>\033[m";
@@ -558,5 +558,5 @@ LvalNode::~LvalNode() {}
 
 std::string LvalNode::getSignature() const {}
 
-}
-}
+} // namespace ast
+} // namespace sysy

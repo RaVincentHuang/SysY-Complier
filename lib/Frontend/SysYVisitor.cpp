@@ -34,13 +34,13 @@ void SysYVisitor::printCst(antlr4::ParserRuleContext *ctx, int depth)
             std::cout << "|\t";
     if(ctx->depth() != depth)
     {
-        std::cout <<"|--> " << "\033[32m<\033[m" << ctx->toStringTree() << "\033[32m>\033[m" << std::endl;
+        std::cout <<"├-> " << "\033[32m<\033[m" << ctx->toStringTree() << "\033[32m>\033[m" << std::endl;
         return;
     }
 
     size_t num = ctx->getRuleIndex();
     if(ctx->getRuleIndex() != SysYParser::RuleCompUnit)
-        std::cout << "|--> ";
+        std::cout << "├--> ";
     
     std::cout << "\033[36m[\033[m" << parser.getRuleNames().at(num) << "\033[36m]\033[m" << std::endl;
     for(auto child : ctx->children)
