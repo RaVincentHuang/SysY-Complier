@@ -57,6 +57,36 @@ sys-y-compiler
 ```
 
 ## 安装说明
+编译依赖于LLVM和ANTLR
+
+### LLVM
+我们需要修改scripts/config.mk 中的变量LLVM_CONFIG为您系统中正确的CONIG脚本名。
+
+### ANTLR4 
+我们需要安装ANTLR作为依赖文件。
+```shell
+cd <Where/you/want/to/install/Antlr4>
+wget https://www.antlr.org/download/antlr-4.9.3-complete.jar
+export CLASSPATH=".:<Where/you/want/to/install/Antlr4>/antlr-4.9.3-complete.jar:$CLASSPATH"
+alias antlr4='java -jar <Where/you/want/to/install/Antlr4>/antlr-4.9.3-complete.jar'
+alias grun='java org.antlr.v4.gui.TestRig'
+```
+
+我们还需要安装ANTLR的C++运行时环境
+```shell
+git clone https://github.com/antlr/antlr4.git
+cd antlr4/runtime/Cpp
+mkdir build && mkdir run && cd build
+cmake .. -DANTLR_JAR_LOCATION=<Where/you/want/to/install/Antlr4>/antlr-4.9.3-complete.jar -DWITH_DEMO=True
+make
+sudo make install
+```
+
+后我们需要修改scripts/config.mk的ANTLR相关的变量
+```makefile
+ANTLR4 = java -jar <Where/you/want/to/install/Antlr4>/antlr-4.9.2-complete.jar -Dlanguage=Cpp -no-listener -visitor
+```
+
 可以使用发行版
 
 ## 软件使用

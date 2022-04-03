@@ -1,5 +1,5 @@
 LLVM_CONFIG ?= llvm-config-15
-CXX = clang++-15
+CXX = clang++
 
 # LLVM
 LLVM_LDFLAGS += `$(LLVM_CONFIG) --ldflags`
