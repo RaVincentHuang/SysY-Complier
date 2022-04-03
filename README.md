@@ -61,14 +61,14 @@ sys-y-compiler
 
 ## 软件使用
 ```shell
-sysyc <filename> [opt, ..]
+$ sysyc <filename> [opt, ..]
 
 # 打印源代码
-sysyc <filename> --gen=src
+$ sysyc <filename> --gen=src
 
 # 打印CST
-sysyc <filename> --gen=cst
+$ sysyc <filename> --gen=cst
 
 # 打印AST
-sysyc <filename> --gen=ast
+$ sysyc <filename> --gen=ast
 ```
